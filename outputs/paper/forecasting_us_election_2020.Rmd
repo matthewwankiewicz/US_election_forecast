@@ -18,9 +18,74 @@ bibliography: references.bib
 library(tidyverse)
 ```
 
+```{r}
+# read in the polling data
+polling <- readRDS("polling_data.rds")
+
+# rename columns of polling data to match post-strat
+polling <- polling %>% 
+  rename(income_group = household_income,
+         education_level = education)
+
+# read in post-strat data 
+post_strat <- readRDS("post_strat.rds")
+post_strat <- post_strat %>% 
+  filter(race != "two major races", race != "three or more major races")
+
+post_strat <- 
+  post_strat %>% 
+  group_by(stateicp) %>% 
+  mutate(total = n()) %>% 
+  mutate(cell_prop_of_division_total = total / sum(total)) %>% 
+  ungroup() %>% 
+  select(-total)
+```
+
+# Introduction
+
+# Data
+
 We have used @citeR and @citeTidyverse so far
 
 Data is from @citeIPUMS and from @citeVSG
+
+# Model
+
+```{r model, echo = F, message=F, warning=F}
+model <- glm(vote_biden ~ sex + age_groups + race +
+               stateicp + income_group + education_level, 
+             data = polling, family = binomial())
+broom::tidy(model)
+
+x <- polling %>% 
+  group_by(income_group) %>% 
+  summarise(n = n())
+y <- post_strat %>% 
+  group_by(income_group) %>% 
+  summarise(n = n())
+```
+
+
+# Results
+
+```{r}
+post_strat$estimate <- 
+  model %>% 
+  predict(newdata = post_strat)
+
+post_strat %>% 
+  mutate(biden_predict_prop = estimate*cell_prop_of_division_total) %>% 
+  group_by(stateicp) %>% 
+  summarise(biden_predict = sum(biden_predict_prop))
+
+grouped <- post_strat %>% 
+  group_by(sex, age_groups, race, income_group, stateicp, education_level) %>% 
+  summarise(n = n()) %>% 
+  mutate(prop_total = n/sum(n))
+```
+
+
+# Discussion
 
 # References
 
