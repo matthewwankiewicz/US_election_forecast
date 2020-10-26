@@ -28,26 +28,123 @@ polling <- polling %>%
          education_level = education)
 
 # read in post-strat data 
-post_strat <- readRDS("post_strat.rds")
+post_strat <- readRDS("census_data.rds")
 post_strat <- post_strat %>% 
   filter(race != "two major races", race != "three or more major races")
-
-post_strat <- 
-  post_strat %>% 
-  group_by(stateicp) %>% 
-  mutate(total = n()) %>% 
-  mutate(cell_prop_of_division_total = total / sum(total)) %>% 
-  ungroup() %>% 
-  select(-total)
 ```
 
 # Introduction
 
 # Data
 
+## Polling
+
 We have used @citeR and @citeTidyverse so far
 
 Data is from @citeIPUMS and from @citeVSG
+
+```{r data, echo=F, message=F, warning=F}
+
+# set up proportions and plots for polling data (variables we focus on)
+gender <- polling %>% 
+  group_by(sex) %>% 
+  summarise(n = n()) %>% 
+  mutate(pct = n/sum(n))
+
+race <- polling %>% 
+  group_by(race) %>% 
+  summarise(n = n()) %>% 
+  mutate(pct = n/sum(n))
+
+income <- polling %>% 
+  group_by(income_group) %>% 
+  summarise(n = n()) %>% 
+  mutate(pct = n/sum(n))
+
+age <- polling %>% 
+  group_by(age_groups) %>% 
+  summarise(n = n()) %>% 
+  mutate(pct = n/sum(n))
+
+ statesicp <- polling %>% 
+  group_by(stateicp) %>% 
+  summarise(n = n()) %>% 
+  mutate(pct = n/sum(n))
+
+ education <- polling %>% 
+  group_by(education_level) %>% 
+  summarise(n = n()) %>% 
+  mutate(pct = n/sum(n))
+
+gender %>% ggplot(aes(sex, pct)) +
+  geom_point() + scale_y_continuous(labels = scales::percent)
+
+race %>% ggplot(aes(race, pct)) +
+  geom_point() + scale_y_continuous(labels = scales::percent)
+
+income %>% ggplot(aes(income_group, pct)) +
+  geom_point() + scale_y_continuous(labels = scales::percent)
+
+age %>% ggplot(aes(age_groups, pct)) +
+  geom_point() + scale_y_continuous(labels = scales::percent)
+
+statesicp %>% ggplot(aes(stateicp, pct)) +
+  geom_point() + scale_y_continuous(labels = scales::percent)
+
+education %>% ggplot(aes(education_level, pct)) +
+  geom_point() + scale_y_continuous(labels = scales::percent)
+
+# set up proportions for post-strat data
+
+gender_post <- post_strat %>% 
+  group_by(sex) %>% 
+  summarise(n = n()) %>% 
+  mutate(pct = n/sum(n))
+
+race_post <- post_strat %>% 
+  group_by(race) %>% 
+  summarise(n = n()) %>% 
+  mutate(pct = n/sum(n))
+
+income_post <- post_strat %>% 
+  group_by(income_group) %>% 
+  summarise(n = n()) %>% 
+  mutate(pct = n/sum(n))
+
+age_post <- post_strat %>% 
+  group_by(age_groups) %>% 
+  summarise(n = n()) %>% 
+  mutate(pct = n/sum(n))
+
+statesicp_post <- post_strat %>% 
+  group_by(stateicp) %>% 
+  summarise(n = n()) %>% 
+  mutate(pct = n/sum(n))
+
+education_post <- post_strat %>% 
+  group_by(education_level) %>% 
+  summarise(n = n()) %>% 
+  mutate(pct = n/sum(n))
+
+gender_post %>% ggplot(aes(sex, pct)) +
+  geom_point() + scale_y_continuous(labels = scales::percent)
+
+race_post %>% ggplot(aes(race, pct)) +
+  geom_point() + scale_y_continuous(labels = scales::percent)
+
+income_post %>% ggplot(aes(income_group, pct)) +
+  geom_point() + scale_y_continuous(labels = scales::percent)
+
+age_post %>% ggplot(aes(age_groups, pct)) +
+  geom_point() + scale_y_continuous(labels = scales::percent)
+
+statesicp_post %>% ggplot(aes(stateicp, pct)) +
+  geom_point() + scale_y_continuous(labels = scales::percent)
+
+education_post %>% ggplot(aes(education_level, pct)) +
+  geom_point() + scale_y_continuous(labels = scales::percent)
+```
+
 
 # Model
 
