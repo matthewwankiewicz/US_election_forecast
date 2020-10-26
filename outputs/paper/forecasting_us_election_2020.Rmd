@@ -1,0 +1,27 @@
+---
+title: "forecasting_election2020"
+author: "Alen Mitrovski, Xiaoyan Yang, Matthew Wankiewicz"
+date: "November 2nd, 2020"
+abstract: |
+  | First sentence. Second sentence. Third sentence. Fourth sentence.
+  |
+  | **Keywords:** Forecasting, US 2020 Election, Trump, Biden;
+output:
+  bookdown::pdf_document2:
+    citation_package: natbib
+toc: FALSE
+bibliography: references.bib
+---
+
+```{r, echo=F, message=F, warning=F}
+#install.packages("tidyverse")
+library(tidyverse)
+```
+
+We have used @citeR and @citeTidyverse so far
+
+Data is from @citeIPUMS and from @citeVSG
+
+# References
+
+
