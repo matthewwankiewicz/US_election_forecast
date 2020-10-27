@@ -52,7 +52,10 @@ reduced_data1$age <- as.numeric(reduced_data1$age)
 
 # professional degree beyond a bachelor's degree was included with masters degree
 
-reduced_data1_new <- reduced_data1 %>% filter(educd != "n/a") %>% 
+# filter out income total of 9999999, many responses were left blank for these
+# respodents
+
+reduced_data1_new <- reduced_data1 %>% filter(educd != "n/a", inctot < 9999999) %>% 
   mutate(age_groups = case_when(
     age <= 29 ~ "18-29",
     age <= 39 ~ "30-39",
@@ -84,7 +87,8 @@ reduced_data1_new <- reduced_data1 %>% filter(educd != "n/a") %>%
     educd == "bachelor's degree" ~ "College Degree (such as B.A., B.S.)",
     educd == "master's degree" ~ "Masters degree",
     educd == "professional degree beyond a bachelor's degree" ~ "Masters degree",
-    educd == "doctoral degree" ~ "Doctorate degree"
+    educd == "doctoral degree" ~ "Doctorate degree",
+    educd == "no schooling completed" ~ "3rd Grade or less"
   ),
   income_group = case_when(
     inctot < 14999 ~ "Less than $14,999",
@@ -111,9 +115,9 @@ reduced_data1_new <- reduced_data1 %>% filter(educd != "n/a") %>%
     inctot < 199999 ~ "$175,000 to $199,999",
     inctot < 224999 ~ "$200,000 to $249,999",
     inctot >= 225000 ~ "$250,000 and above",
-    inctot == NA ~ "Less than $14,999"
   )
   )
+
 
 reduced_data1_new$income_group <- as.factor(reduced_data1_new$income_group)
 reduced_data1_new$education_level <- as.factor(reduced_data1_new$education_level)

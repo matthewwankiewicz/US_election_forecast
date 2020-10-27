@@ -16,7 +16,9 @@ bibliography: references.bib
 ```{r, echo=F, message=F, warning=F}
 #install.packages("tidyverse")
 #install.packages("gtsummary")
+#install.packages("statebins")
 library(tidyverse)
+library(statebins)
 ```
 
 ```{r, echo=F, message=F, warning=F}
@@ -29,9 +31,10 @@ polling <- polling %>%
          education_level = education)
 
 # read in post-strat data 
-post_strat <- readRDS("census_data.rds")
+post_strat <- readRDS("post_strat.rds")
 post_strat <- post_strat %>% 
-  filter(race != "two major races", race != "three or more major races")
+  filter(race != "two major races", race != "three or more major races",
+         age >= 18)
 ```
 
 # Introduction
@@ -168,7 +171,39 @@ gtsummary::tbl_regression(model)
 
 This table was created using the results from our model and the tbl_regression function from @citeGT
 
+```{r prediction, echo=F, warning=F, message=F}
+post_strat$prediction <- predict(model, 
+                                 newdata = post_strat, 
+                                 type="response")
+
+post_strat <- post_strat %>% 
+  mutate(vote_biden = ifelse(prediction < .5, 0, 1))
+```
+
+
 # Results
+
+```{r stateplot, echo=F, message=F, warning=F, fig.cap="Proportion of each State Voting for Biden"}
+state_props <- post_strat %>% 
+  group_by(stateicp, vote_biden) %>% 
+  summarise(n = n()) %>% 
+  mutate(Freq = n/sum(n))
+
+state_props$stateicp <- as.character(state_props$stateicp)
+
+state_props %>% 
+  mutate(statename = str_to_title(stateicp)) %>% 
+  ggplot(aes(fill = Freq, state = statename)) + 
+  geom_statebins() + 
+  scale_fill_gradient2(low = "red", mid = "grey", high = "blue", midpoint = 0.5) +
+  theme_classic() +
+  theme(axis.line = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank()) +
+  labs(fill = "Proportion Voting \n for Biden")
+```
+
+This plot was created using @citeStatebins
 
 
 # Discussion
