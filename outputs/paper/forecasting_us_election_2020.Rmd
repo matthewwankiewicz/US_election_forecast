@@ -15,10 +15,11 @@ bibliography: references.bib
 
 ```{r, echo=F, message=F, warning=F}
 #install.packages("tidyverse")
+#install.packages("gtsummary")
 library(tidyverse)
 ```
 
-```{r}
+```{r, echo=F, message=F, warning=F}
 # read in the polling data
 polling <- readRDS("polling_data.rds")
 
@@ -39,11 +40,11 @@ post_strat <- post_strat %>%
 
 ## Polling
 
-We have used @citeR and @citeTidyverse so far
+We have used @citeR and @citeTidyverse for data analysis
 
 Data is from @citeIPUMS and from @citeVSG
 
-```{r data, echo=F, message=F, warning=F}
+```{r data1, echo=F, message=F, warning=F, fig.cap="Demographics of Sample and Population"}
 
 # set up proportions and plots for polling data (variables we focus on)
 gender <- polling %>% 
@@ -138,53 +139,36 @@ variables <- rbind(education, education_post,
              race, race_post)
 
 variables %>% ggplot(aes(as.factor(level), pct, group=as.factor(type), linetype = as.factor(type))) + 
-  geom_line() + facet_wrap(~group, ncol = 4, scales = "free") + 
+  geom_line() + facet_grid(~group, scales = "free") + 
   theme(axis.text.x = element_text(angle=70, size = 6, hjust = 1)) +
-  labs(x = "category", y = "percentage", linetype = "data set")
+  labs(x = "category", y = "percentage", linetype = "data set") + 
+  scale_y_continuous(labels = scales::percent)
+```
 
+```{r data2, echo = F, message=F, warning=F, fig.cap="More Demographics of Sample and Population"}
 variables2 <- rbind(income, income_post,
                     statesicp, statesicp_post)
 variables2 %>% ggplot(aes(as.factor(level), pct, group=as.factor(type), linetype = as.factor(type))) + 
   geom_line() + facet_wrap(~group, nrow = 2, scales = "free") + 
   theme(axis.text.x = element_text(angle=70, size = 6, hjust = 1)) +
-  labs(x = "category", y = "percentage", linetype = "data set")
+  labs(x = "category", y = "percentage", linetype = "data set") +
+  scale_y_continuous(labels = scales::percent)
 ```
 
 
 # Model
 
-```{r model, echo = F, message=F, warning=F}
+```{r model, echo = F, message=F, warning=F, fig.cap="Results of Regression Model"}
 model <- glm(vote_biden ~ sex + age_groups + race +
                stateicp + income_group + education_level, 
              data = polling, family = binomial())
-broom::tidy(model)
 
-x <- polling %>% 
-  group_by(income_group) %>% 
-  summarise(n = n())
-y <- post_strat %>% 
-  group_by(income_group) %>% 
-  summarise(n = n())
+gtsummary::tbl_regression(model)
 ```
 
+This table was created using the results from our model and the tbl_regression function from @citeGT
 
 # Results
-
-```{r}
-post_strat$estimate <- 
-  model %>% 
-  predict(newdata = post_strat)
-
-post_strat %>% 
-  mutate(biden_predict_prop = estimate*cell_prop_of_division_total) %>% 
-  group_by(stateicp) %>% 
-  summarise(biden_predict = sum(biden_predict_prop))
-
-grouped <- post_strat %>% 
-  group_by(sex, age_groups, race, income_group, stateicp, education_level) %>% 
-  summarise(n = n()) %>% 
-  mutate(prop_total = n/sum(n))
-```
 
 
 # Discussion
