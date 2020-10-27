@@ -49,100 +49,105 @@ Data is from @citeIPUMS and from @citeVSG
 gender <- polling %>% 
   group_by(sex) %>% 
   summarise(n = n()) %>% 
-  mutate(pct = n/sum(n))
+  mutate(pct = n/sum(n), type = "poll",
+         group = "gender") %>% 
+  rename(level = sex)
 
 race <- polling %>% 
   group_by(race) %>% 
   summarise(n = n()) %>% 
-  mutate(pct = n/sum(n))
+  mutate(pct = n/sum(n), type = "poll",
+         group = "race") %>% 
+  rename(level = race)
 
 income <- polling %>% 
   group_by(income_group) %>% 
   summarise(n = n()) %>% 
-  mutate(pct = n/sum(n))
+  mutate(pct = n/sum(n), type = "poll",
+         group = "income") %>% 
+  drop_na(income_group) %>% 
+  rename(level = income_group)
 
 age <- polling %>% 
   group_by(age_groups) %>% 
   summarise(n = n()) %>% 
-  mutate(pct = n/sum(n))
+  mutate(pct = n/sum(n), type = "poll",
+         group = "age") %>% 
+  rename(level = age_groups)
 
  statesicp <- polling %>% 
   group_by(stateicp) %>% 
   summarise(n = n()) %>% 
-  mutate(pct = n/sum(n))
+  mutate(pct = n/sum(n), type = "poll",
+         group = "state") %>% 
+   rename(level = stateicp)
 
  education <- polling %>% 
   group_by(education_level) %>% 
   summarise(n = n()) %>% 
-  mutate(pct = n/sum(n))
-
-gender %>% ggplot(aes(sex, pct)) +
-  geom_point() + scale_y_continuous(labels = scales::percent)
-
-race %>% ggplot(aes(race, pct)) +
-  geom_point() + scale_y_continuous(labels = scales::percent)
-
-income %>% ggplot(aes(income_group, pct)) +
-  geom_point() + scale_y_continuous(labels = scales::percent)
-
-age %>% ggplot(aes(age_groups, pct)) +
-  geom_point() + scale_y_continuous(labels = scales::percent)
-
-statesicp %>% ggplot(aes(stateicp, pct)) +
-  geom_point() + scale_y_continuous(labels = scales::percent)
-
-education %>% ggplot(aes(education_level, pct)) +
-  geom_point() + scale_y_continuous(labels = scales::percent)
+  mutate(pct = n/sum(n), type = "poll",
+         group = "education") %>% 
+   rename(level = education_level)
 
 # set up proportions for post-strat data
 
 gender_post <- post_strat %>% 
   group_by(sex) %>% 
   summarise(n = n()) %>% 
-  mutate(pct = n/sum(n))
+  mutate(pct = n/sum(n), type = "post_strat",
+         group = "gender") %>% 
+  rename(level = sex)
 
 race_post <- post_strat %>% 
   group_by(race) %>% 
   summarise(n = n()) %>% 
-  mutate(pct = n/sum(n))
+  mutate(pct = n/sum(n), type = "post_strat",
+         group = "race") %>% 
+  rename(level = race)
 
 income_post <- post_strat %>% 
   group_by(income_group) %>% 
   summarise(n = n()) %>% 
-  mutate(pct = n/sum(n))
+  mutate(pct = n/sum(n), type = "post_strat",
+         group = "income") %>% 
+  rename(level = income_group)
 
 age_post <- post_strat %>% 
   group_by(age_groups) %>% 
   summarise(n = n()) %>% 
-  mutate(pct = n/sum(n))
+  mutate(pct = n/sum(n), type = "post_strat",
+         group = "age") %>% 
+  rename(level = age_groups)
 
 statesicp_post <- post_strat %>% 
   group_by(stateicp) %>% 
   summarise(n = n()) %>% 
-  mutate(pct = n/sum(n))
+  mutate(pct = n/sum(n), type = "post_strat",
+         group = "state") %>% 
+  rename(level = stateicp)
 
 education_post <- post_strat %>% 
   group_by(education_level) %>% 
   summarise(n = n()) %>% 
-  mutate(pct = n/sum(n))
+  mutate(pct = n/sum(n), type = "post_strat",
+         group = "education") %>% 
+  rename(level = education_level)
 
-gender_post %>% ggplot(aes(sex, pct)) +
-  geom_point() + scale_y_continuous(labels = scales::percent)
+variables <- rbind(education, education_post,
+             age, age_post, gender, gender_post, 
+             race, race_post)
 
-race_post %>% ggplot(aes(race, pct)) +
-  geom_point() + scale_y_continuous(labels = scales::percent)
+variables %>% ggplot(aes(as.factor(level), pct, group=as.factor(type), linetype = as.factor(type))) + 
+  geom_line() + facet_wrap(~group, ncol = 4, scales = "free") + 
+  theme(axis.text.x = element_text(angle=70, size = 6, hjust = 1)) +
+  labs(x = "category", y = "percentage", linetype = "data set")
 
-income_post %>% ggplot(aes(income_group, pct)) +
-  geom_point() + scale_y_continuous(labels = scales::percent)
-
-age_post %>% ggplot(aes(age_groups, pct)) +
-  geom_point() + scale_y_continuous(labels = scales::percent)
-
-statesicp_post %>% ggplot(aes(stateicp, pct)) +
-  geom_point() + scale_y_continuous(labels = scales::percent)
-
-education_post %>% ggplot(aes(education_level, pct)) +
-  geom_point() + scale_y_continuous(labels = scales::percent)
+variables2 <- rbind(income, income_post,
+                    statesicp, statesicp_post)
+variables2 %>% ggplot(aes(as.factor(level), pct, group=as.factor(type), linetype = as.factor(type))) + 
+  geom_line() + facet_wrap(~group, nrow = 2, scales = "free") + 
+  theme(axis.text.x = element_text(angle=70, size = 6, hjust = 1)) +
+  labs(x = "category", y = "percentage", linetype = "data set")
 ```
 
 
