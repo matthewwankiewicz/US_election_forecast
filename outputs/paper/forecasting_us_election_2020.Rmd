@@ -25,25 +25,22 @@ library(statebins)
 # read in the polling data
 polling <- readRDS("polling_data.rds")
 
-# rename columns of polling data to match post-strat
-polling <- polling %>% 
-  rename(income_group = household_income,
-         education_level = education)
-
 # read in post-strat data 
 post_strat <- readRDS("post_strat.rds")
 post_strat <- post_strat %>% 
   filter(race != "two major races", race != "three or more major races",
          age >= 18)
+
+# read in electoral colleges data
+elec_college <- read_csv("electoral_colleges.csv")
+elec_college$State <- tolower(elec_college$State)
 ```
 
 # Introduction
 
 # Data
 
-## Polling
-
-We have used @citeR and @citeTidyverse for data analysis
+We have used @citeTidyverse for data analysis
 
 Data is from @citeIPUMS and from @citeVSG
 
@@ -57,20 +54,20 @@ gender <- polling %>%
          group = "gender") %>% 
   rename(level = sex)
 
-race <- polling %>% 
-  group_by(race) %>% 
+races <- polling %>% 
+  group_by(races) %>% 
   summarise(n = n()) %>% 
   mutate(pct = n/sum(n), type = "poll",
-         group = "race") %>% 
-  rename(level = race)
+         group = "races") %>% 
+  rename(level = races)
 
-income <- polling %>% 
-  group_by(income_group) %>% 
+education <- polling %>% 
+  group_by(education_level) %>% 
   summarise(n = n()) %>% 
   mutate(pct = n/sum(n), type = "poll",
-         group = "income") %>% 
-  drop_na(income_group) %>% 
-  rename(level = income_group)
+         group = "education") %>% 
+  drop_na(education_level) %>% 
+  rename(level = education_level)
 
 age <- polling %>% 
   group_by(age_groups) %>% 
@@ -86,12 +83,12 @@ age <- polling %>%
          group = "state") %>% 
    rename(level = stateicp)
 
- education <- polling %>% 
-  group_by(education_level) %>% 
+ hispanic <- polling %>% 
+  group_by(hispan) %>% 
   summarise(n = n()) %>% 
   mutate(pct = n/sum(n), type = "poll",
-         group = "education") %>% 
-   rename(level = education_level)
+         group = "hispanic") %>% 
+   rename(level = hispan)
 
 # set up proportions for post-strat data
 
@@ -102,19 +99,19 @@ gender_post <- post_strat %>%
          group = "gender") %>% 
   rename(level = sex)
 
-race_post <- post_strat %>% 
-  group_by(race) %>% 
+races_post <- post_strat %>% 
+  group_by(races) %>% 
   summarise(n = n()) %>% 
   mutate(pct = n/sum(n), type = "post_strat",
-         group = "race") %>% 
-  rename(level = race)
+         group = "races") %>% 
+  rename(level = races)
 
-income_post <- post_strat %>% 
-  group_by(income_group) %>% 
+education_post <- post_strat %>% 
+  group_by(education_level) %>% 
   summarise(n = n()) %>% 
   mutate(pct = n/sum(n), type = "post_strat",
-         group = "income") %>% 
-  rename(level = income_group)
+         group = "education") %>% 
+  rename(level = education_level)
 
 age_post <- post_strat %>% 
   group_by(age_groups) %>% 
@@ -130,16 +127,16 @@ statesicp_post <- post_strat %>%
          group = "state") %>% 
   rename(level = stateicp)
 
-education_post <- post_strat %>% 
-  group_by(education_level) %>% 
+hispanic_post <- post_strat %>% 
+  group_by(hispan) %>% 
   summarise(n = n()) %>% 
   mutate(pct = n/sum(n), type = "post_strat",
-         group = "education") %>% 
-  rename(level = education_level)
+         group = "hispanic") %>% 
+  rename(level = hispan)
 
-variables <- rbind(education, education_post,
+variables <- rbind(hispanic, hispanic_post,
              age, age_post, gender, gender_post, 
-             race, race_post)
+             races, races_post)
 
 variables %>% ggplot(aes(as.factor(level), pct, group=as.factor(type), linetype = as.factor(type))) + 
   geom_line() + facet_grid(~group, scales = "free") + 
@@ -149,7 +146,7 @@ variables %>% ggplot(aes(as.factor(level), pct, group=as.factor(type), linetype 
 ```
 
 ```{r data2, echo = F, message=F, warning=F, fig.cap="More Demographics of Sample and Population"}
-variables2 <- rbind(income, income_post,
+variables2 <- rbind(education, education_post,
                     statesicp, statesicp_post)
 variables2 %>% ggplot(aes(as.factor(level), pct, group=as.factor(type), linetype = as.factor(type))) + 
   geom_line() + facet_wrap(~group, nrow = 2, scales = "free") + 
@@ -161,47 +158,105 @@ variables2 %>% ggplot(aes(as.factor(level), pct, group=as.factor(type), linetype
 
 # Model
 
+In order to predict whether or not a person plans to vote for Joe Biden or Donald Trump, we plan to use logistic regression. Since logistic regression only works for binary response variables, we used a variable we created called `vote_biden` which returns a 1 is the respondent plan to vote for Joe Biden and a 0 if they don't (in this scenario we assume that they are voting for Donald Trump). The logistic regression model takes the form of:
+
+$$  
+log(\frac{\hat{p}}{1 - \hat{p}}) = \beta_{0} + \beta_{1}x_{sex} + 
+\beta_{2}x_{agegroup} + \beta_{3}x_{race} + \beta_{4}x_{state} + \beta_{5}x_{income} + \beta_{6}x_{hispanic}
+$$
+In the equation above, each $\beta$ represents a coefficient that the regression model will compute for us. As for our variables, we have chosen to use sex, age, race, income, state, and whether the respondent is hispanic. We decided to use the first 3 because they are generally strong predictors of which candidate a person would support, such as how some states tend to vote republican year after year while some states flip between democratic and republican almost every election. Next, we decided to choose income, because Joe Biden has made claims to increase taxes on the rich, which may influence their support for him. Lastly, we wanted to focus on whether the respondent was hispanic and if so, where they were from. This variable was important for our predictions because we know how poorly Donald Trump has spoken of hispanic people and we believe they could have a strong impact on the election.
+
+The output of the logistic regression model will give us a probability of whether or not a voter plans to vote for Joe Biden or not. In order to find this probability, we take the sum of the right side of the equation and plug it into the equation below:
+
+$$
+\frac{e^{sum}}{1+e^{sum}}
+$$
+
+This equation is just a manipulation of the initial equation, where e is the exponential equation ad sum is the sum of the right side of equation 1. We see that as the sum of the right side increases, the probability that a person will vote for Joe Biden increases as well. 
+
+We are running our regression model using the glm() function in R (@citeR). The decision to run this model over other models like linear regression was made by the fact that we were predicting a binary variable about a voter's decision. Since there are only two possible options our data will likely follow an S shape and a straight line equation will not be helpful to model this relationship. 
+
+Our model does have some weaknesses, since the output must be binary, we cannot account for other candidates or a person deciding not to vote. This issue isn't too large because our main goal is to determine which of the two main candidates will be chosen by the people of America. Another weakness our model does encounter is that 
+
 ```{r model, echo = F, message=F, warning=F, fig.cap="Results of Regression Model"}
-model <- glm(vote_biden ~ sex + age_groups + race +
-               stateicp + income_group + education_level, 
+polling <- polling %>% 
+  mutate(hispanic_test = ifelse(hispan == "not hispanic", 0, 1))
+post_strat <- post_strat %>% 
+  mutate(hispanic_test = ifelse(hispan == "not hispanic", 0, 1))
+
+model2 <- glm(vote_biden ~ sex + age_groups + races +
+               stateicp + hispanic_test + education_level, 
              data = polling, family = binomial())
 
-gtsummary::tbl_regression(model)
+broom::tidy(model2)
+
+#gtsummary::tbl_regression(model)
 ```
 
 This table was created using the results from our model and the tbl_regression function from @citeGT
 
 ```{r prediction, echo=F, warning=F, message=F}
-post_strat$prediction <- predict(model, 
-                                 newdata = post_strat, 
-                                 type="response")
+props <- post_strat %>% 
+  group_by(stateicp, races, age_groups, hispanic_test,
+           sex, education_level) %>% 
+  summarise(n = n()) %>% 
+  group_by(stateicp) %>% 
+  mutate(prop = n/sum(n))
 
-post_strat <- post_strat %>% 
-  mutate(vote_biden = ifelse(prediction < .5, 0, 1))
+sum(props$prop)
+
+props$estimate <- predict.glm(model2, newdata = props,
+                          type = "response")
+
+sum(props$prop)
+
+voting_biden <- props %>% mutate(biden_predict_prop=estimate*prop) %>%
+  group_by(stateicp) %>%
+  summarise(biden_predict = sum(biden_predict_prop))
 ```
+
 
 
 # Results
 
 ```{r stateplot, echo=F, message=F, warning=F, fig.cap="Proportion of each State Voting for Biden"}
-state_props <- post_strat %>% 
-  group_by(stateicp, vote_biden) %>% 
-  summarise(n = n()) %>% 
-  mutate(Freq = n/sum(n))
 
-state_props$stateicp <- as.character(state_props$stateicp)
+# plot for predictions, still need to code pre-model data and error bars
 
-state_props %>% 
+voting_biden %>% 
+  ggplot(aes(x = stateicp, y = biden_predict)) +
+  geom_point() +
+  geom_line() +
+  scale_y_continuous(labels = scales::percent) +
+  theme(axis.text.x = element_text(angle = 70, size = 6, hjust = 1))
+
+
+# plot state map
+
+voting_biden %>% 
   mutate(statename = str_to_title(stateicp)) %>% 
-  ggplot(aes(fill = Freq, state = statename)) + 
+  ggplot(aes(fill = biden_predict, state = statename)) + 
   geom_statebins() + 
-  scale_fill_gradient2(low = "red", mid = "grey", high = "blue", midpoint = 0.5) +
+  scale_fill_gradient2(low = "red", high = "blue", midpoint = 0.5) +
   theme_classic() +
   theme(axis.line = element_blank(),
         axis.text = element_blank(),
         axis.ticks = element_blank()) +
   labs(fill = "Proportion Voting \n for Biden")
 ```
+
+```{r elec college, echo=F, message=F, warning=F}
+states_biden_prop <- voting_biden %>%
+  rename("State" = stateicp)
+states_college <- inner_join(states_biden_prop, elec_college, by = "State")
+
+states_college <- states_college %>% 
+  mutate(biden_collges = round(Number_of_colleges*biden_predict))
+
+sum(states_college$biden_collges)
+```
+
+
 
 This plot was created using @citeStatebins
 

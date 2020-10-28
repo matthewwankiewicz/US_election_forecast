@@ -20,7 +20,7 @@ raw_data1 <- labelled::to_factor(raw_data1)
 
 # Just keep some variables that may be of interest (change 
 # this depending on your interests)
-names(raw_data)
+names(raw_data1)
 
 reduced_data1 <- 
   raw_data1 %>% 
@@ -55,72 +55,51 @@ reduced_data1$age <- as.numeric(reduced_data1$age)
 # filter out income total of 9999999, many responses were left blank for these
 # respodents
 
-reduced_data1_new <- reduced_data1 %>% filter(educd != "n/a", inctot < 9999999) %>% 
+reduced_data1_new <- reduced_data1 %>% filter(inctot < 9999999) %>% 
+  filter(race != "two major races", race != "three or more major races",
+         age >= 18) %>% 
   mutate(age_groups = case_when(
-    age <= 29 ~ "18-29",
-    age <= 39 ~ "30-39",
-    age <= 49 ~ "40-49",
-    age <= 59 ~ "50-59",
-    age <= 69 ~ "60-69",
-    age > 69 ~ "70+"
+    age <= 35 ~ "18-35",
+    age <= 50 ~ "36-49",
+    age <= 65 ~ "50-65",
+    age >= 65 ~ "65+"
   ),
   education_level = case_when(
-    educd == "nursery school, preschool" ~ "3rd Grade or less",
-    educd == "kindergarten" ~ "3rd Grade or less",
-    educd == "grade 1" ~ "3rd Grade or less",
-    educd == "grade 2" ~ "3rd Grade or less",
-    educd == "grade 3" ~ "3rd Grade or less",
-    educd == "grade 4" ~ "Middle School - Grades 4 - 8",
-    educd == "grade 5" ~ "Middle School - Grades 4 - 8",
-    educd == "grade 6" ~ "Middle School - Grades 4 - 8",
-    educd == "grade 7" ~ "Middle School - Grades 4 - 8",
-    educd == "grade 8" ~ "Middle School - Grades 4 - 8",
-    educd == "grade 9" ~ "Completed some high school",
-    educd == "grade 10" ~ "Completed some high school",
-    educd == "grade 11" ~ "Completed some high school",
-    educd == "12th grade, no diploma" ~ "Completed some high school",
-    educd == "regular high school diploma" ~ "High school graduate",
-    educd == "ged or alternative credential" ~ "Other post high school vocational training",
+    educd == "nursery school, preschool" ~ "High school or lower",
+    educd == "kindergarten" ~ "High school or lower",
+    educd == "grade 1" ~ "High school or lower",
+    educd == "grade 2" ~ "High school or lower",
+    educd == "grade 3" ~ "High school or lower",
+    educd == "grade 4" ~ "High school or lower",
+    educd == "grade 5" ~ "High school or lower",
+    educd == "grade 6" ~ "High school or lower",
+    educd == "grade 7" ~ "High school or lower",
+    educd == "grade 8" ~ "High school or lower",
+    educd == "grade 9" ~ "High school or lower",
+    educd == "grade 10" ~ "High school or lower",
+    educd == "grade 11" ~ "High school or lower",
+    educd == "12th grade, no diploma" ~ "High school or lower",
+    educd == "regular high school diploma" ~ "High school or lower",
+    educd == "ged or alternative credential" ~ "High school or lower",
     educd == "some college, but less than 1 year" ~ "Completed some college, but no degree",
     educd == "1 or more years of college credit, no degree" ~ "Completed some college, but no degree",
-    educd == "associate's degree, type not specified" ~ "Associate Degree",
-    educd == "bachelor's degree" ~ "College Degree (such as B.A., B.S.)",
-    educd == "master's degree" ~ "Masters degree",
-    educd == "professional degree beyond a bachelor's degree" ~ "Masters degree",
-    educd == "doctoral degree" ~ "Doctorate degree",
-    educd == "no schooling completed" ~ "3rd Grade or less"
+    educd == "associate's degree, type not specified" ~ "Post Secondary or Higher",
+    educd == "bachelor's degree" ~ "Post Secondary or Higher",
+    educd == "master's degree" ~ "Post Secondary or Higher",
+    educd == "professional degree beyond a bachelor's degree" ~ "Post Secondary or Higher",
+    educd == "doctoral degree" ~ "Post Secondary or Higher",
+    educd == "no schooling completed" ~ "High school or lower"
   ),
-  income_group = case_when(
-    inctot < 14999 ~ "Less than $14,999",
-    inctot < 19999 ~ "$15,000 to $19,999",
-    inctot < 24999 ~ "$20,000 to $24,999",
-    inctot < 29999 ~ "$25,000 to $29,999",
-    inctot < 34999 ~ "$30,000 to $34,999",
-    inctot < 39999 ~ "$35,000 to $39,999",
-    inctot < 44999 ~ "$40,000 to $44,999",
-    inctot < 49999 ~ "$45,000 to $49,999",
-    inctot < 55999 ~ "$50,000 to $54,999",
-    inctot < 59999 ~ "$55,000 to $59,999",
-    inctot < 64999 ~ "$60,000 to $64,999",
-    inctot < 69999 ~ "$65,000 to $69,999",
-    inctot < 74999 ~ "$70,000 to $74,999",
-    inctot < 79999 ~ "$75,000 to $79,999",
-    inctot < 84999 ~ "$80,000 to $84,999",
-    inctot < 89999 ~ "$85,000 to $89,999",
-    inctot < 94999 ~ "$90,000 to $94,999",
-    inctot < 99999 ~ "$95,000 to $99,999",
-    inctot < 124999 ~ "$100,000 to $124,999",
-    inctot < 149999 ~ "$125,000 to $149,999",
-    inctot < 174999 ~ "$150,000 to $174,999",
-    inctot < 199999 ~ "$175,000 to $199,999",
-    inctot < 224999 ~ "$200,000 to $249,999",
-    inctot >= 225000 ~ "$250,000 and above",
-  )
+  races = ifelse(race == "white", "white",
+                 ifelse(race == "black/african american/negro", "black",
+                        ifelse(race == "other race, nec", "other race, nec", "asian")))
   )
 
 
-reduced_data1_new$income_group <- as.factor(reduced_data1_new$income_group)
 reduced_data1_new$education_level <- as.factor(reduced_data1_new$education_level)
+reduced_data1_new$races <- as.factor(reduced_data1_new$races)
+
+
 
 write_rds(reduced_data1_new, "outputs/paper/post_strat.rds")
 

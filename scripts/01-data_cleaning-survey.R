@@ -44,7 +44,6 @@ reduced_data <-
 # Maybe check the values?
 # Is vote a binary? If not, what are you going to do?
 
-
 names_matcher <- tibble(stateicp = state.name, state = state.abb)
 
 # group voter ages by intervals of 10 years or so
@@ -53,31 +52,57 @@ names_matcher <- tibble(stateicp = state.name, state = state.abb)
 
 reduced_data_new <- reduced_data %>% filter(vote_2020 == "Joe Biden" | vote_2020 == "Donald Trump") %>% 
   mutate(age_groups = case_when(
-    age <= 29 ~ "18-29",
-    age <= 39 ~ "30-39",
-    age <= 49 ~ "40-49",
-    age <= 59 ~ "50-59",
-    age <= 69 ~ "60-69",
-    age > 69 ~ "70+"
+    age <= 35 ~ "18-35",
+    age <= 50 ~ "36-49",
+    age <= 65 ~ "50-65",
+    age >= 65 ~ "65+"
   ),
   vote_biden = ifelse(vote_2020 == "Joe Biden", 1, 0),
   sex = ifelse(gender == "Female", "female", "male"),
-  race = case_when(
+  races = case_when(
     race_ethnicity == "White" ~ "white",
-    race_ethnicity == "Black, or African American" ~ "black/african american/negro",
-    race_ethnicity == "American Indian or Alaska Native" ~ "american indian or alaska native",
-    race_ethnicity == "Asian (Chinese)" ~ "chinese",
-    race_ethnicity == "Asian (Japanese)" ~ "japanese",
-    race_ethnicity == "Asian (Asian Indian)" ~ "other asian or pacific islander",
-    race_ethnicity == "Asian (Filipino)" ~ "other asian or pacific islander",
-    race_ethnicity == "Asian (Korean)" ~ "other asian or pacific islander",
-    race_ethnicity == "Asian (Vietnamese)" ~ "other asian or pacific islander",
-    race_ethnicity == "Asian (Other)" ~ "other asian or pacific islander",
-    race_ethnicity == "Pacific Islander (Native Hawaiian)" ~ "other asian or pacific islander",
-    race_ethnicity == "Pacific Islander (Guamanian)" ~ "other asian or pacific islander",
-    race_ethnicity == "Pacific Islander (Samoan)" ~ "other asian or pacific islander",
-    race_ethnicity == "Pacific Islander (Other)" ~ "other asian or pacific islander",
+    race_ethnicity == "Black, or African American" ~ "black",
+    race_ethnicity == "American Indian or Alaska Native" ~ "other race, nec",
+    race_ethnicity == "Asian (Chinese)" ~ "asian",
+    race_ethnicity == "Asian (Japanese)" ~ "asian",
+    race_ethnicity == "Asian (Asian Indian)" ~ "asian",
+    race_ethnicity == "Asian (Filipino)" ~ "asian",
+    race_ethnicity == "Asian (Korean)" ~ "asian",
+    race_ethnicity == "Asian (Vietnamese)" ~ "asian",
+    race_ethnicity == "Asian (Other)" ~ "asian",
+    race_ethnicity == "Pacific Islander (Native Hawaiian)" ~ "asian",
+    race_ethnicity == "Pacific Islander (Guamanian)" ~ "asian",
+    race_ethnicity == "Pacific Islander (Samoan)" ~ "asian",
+    race_ethnicity == "Pacific Islander (Other)" ~ "asian",
     race_ethnicity == "Some other race" ~ "other race, nec"
+  ),
+  hispan = ifelse(hispanic == "Not Hispanic", "not hispanic",
+                  ifelse(hispanic == "Mexican", "mexican", 
+                         ifelse(hispanic == "Puerto Rican", "puerto rican",
+                                ifelse(hispanic == "Cuban", "cuban", "other")))),
+  empstat = case_when(
+    employment == "Full-time employed" ~ "employed",
+    employment == "Part-time employed" ~ "employed",
+    employment == "Self-employed" ~ "employed",
+    employment == "Homemaker" ~ "not in labor force",
+    employment == "Retired" ~ "not in labor force",
+    employment == "Student" ~ "not in labor force",
+    employment == "Permanently disabled" ~ "not in labor force",
+    employment == "Other:" ~ "not in labor force",
+    employment == "Unemployed or temorarily on layoff" ~ "unemployed"
+  ),
+  education_level = case_when(
+    education == "3rd Grade or less" ~ "High school or lower",
+    education == "Middle School - Grades 4 - 8" ~ "High school or lower",
+    education == "Completed some high school" ~ "High school or lower",
+    education == "High school graduate" ~ "High school or lower",
+    education == "Other post high school vocational training" ~ "High school or lower",
+    education == "Completed some college, but no degree" ~ "Completed some college, but no degree",
+    education == "Associate Degree" ~ "Post Secondary or Higher",
+    education == "College Degree (such as B.A., B.S.)" ~ "Post Secondary or Higher",
+    education == "Completed some graduate, but no degree" ~ "Post Secondary or Higher",
+    education == "Masters degree" ~ "Post Secondary or Higher",
+    education == "Doctorate degree" ~ "Post Secondary or Higher",
   )
   )
 
@@ -98,8 +123,10 @@ reduced_data_new$stateicp <- replace_na(reduced_data_new$stateicp, "district of 
 # change format of columns to match post-strat formats
 
 reduced_data_new$sex <- as.factor(reduced_data_new$sex)
-reduced_data_new$race <- as.factor(reduced_data_new$race)
+reduced_data_new$races <- as.factor(reduced_data_new$races)
 reduced_data_new$stateicp <- as.factor(reduced_data_new$stateicp)
+reduced_data_new$hispan <- as.factor(reduced_data_new$hispan)
+reduced_data_new$education_level <- as.factor(reduced_data_new$education_level)
 
 
 write_rds(reduced_data_new, "outputs/paper/polling_data.rds")
