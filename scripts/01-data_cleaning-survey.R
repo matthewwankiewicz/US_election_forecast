@@ -36,7 +36,8 @@ reduced_data <-
          education,
          state,
          congress_district,
-         age)
+         age,
+         language)
 
 
 #### What else???? ####
@@ -103,7 +104,8 @@ reduced_data_new <- reduced_data %>% filter(vote_2020 == "Joe Biden" | vote_2020
     education == "Completed some graduate, but no degree" ~ "Post Secondary or Higher",
     education == "Masters degree" ~ "Post Secondary or Higher",
     education == "Doctorate degree" ~ "Post Secondary or Higher",
-  )
+  ),
+  speak_english = ifelse(language == "No, we speak only English.", 1, 0)
   )
 
 # format state names so the whole state name is written out, to match IPUMS data

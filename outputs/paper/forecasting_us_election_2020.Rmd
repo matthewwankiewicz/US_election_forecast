@@ -1,11 +1,11 @@
 ---
-title: "forecasting_election2020"
+title: "Joe Biden projected to win Popular Vote in 2020 US Election with 51% of Vote"
 author: "Alen Mitrovski, Xiaoyan Yang, Matthew Wankiewicz"
 date: "November 2nd, 2020"
 abstract: |
   | First sentence. Second sentence. Third sentence. Fourth sentence.
   |
-  | **Keywords:** Forecasting, US 2020 Election, Trump, Biden;
+  | **Keywords:** Forecasting, US 2020 Election, Trump, Biden, multilevel regression with post-stratification;
 output:
   bookdown::pdf_document2:
     citation_package: natbib
@@ -17,8 +17,10 @@ bibliography: references.bib
 #install.packages("tidyverse")
 #install.packages("gtsummary")
 #install.packages("statebins")
+#install.packages("broom")
 library(tidyverse)
 library(statebins)
+library(broom)
 ```
 
 ```{r, echo=F, message=F, warning=F}
@@ -40,9 +42,9 @@ elec_college$State <- tolower(elec_college$State)
 
 # Data
 
-We have used @citeTidyverse for data analysis
+We have used R (@citeR), specifically Tidyverse (@citeTidyverse) for data analysis
 
-Data is from @citeIPUMS and from @citeVSG
+Data is from ACS (@citeIPUMS) and from Voter Study Group (@citeVSG).
 
 ```{r data1, echo=F, message=F, warning=F, fig.cap="Demographics of Sample and Population"}
 
@@ -76,14 +78,14 @@ age <- polling %>%
          group = "age") %>% 
   rename(level = age_groups)
 
- statesicp <- polling %>% 
+statesicp <- polling %>% 
   group_by(stateicp) %>% 
   summarise(n = n()) %>% 
   mutate(pct = n/sum(n), type = "poll",
          group = "state") %>% 
    rename(level = stateicp)
 
- hispanic <- polling %>% 
+hispanic <- polling %>% 
   group_by(hispan) %>% 
   summarise(n = n()) %>% 
   mutate(pct = n/sum(n), type = "poll",
@@ -139,11 +141,14 @@ variables <- rbind(hispanic, hispanic_post,
              races, races_post)
 
 variables %>% ggplot(aes(as.factor(level), pct, group=as.factor(type), linetype = as.factor(type))) + 
-  geom_line() + facet_grid(~group, scales = "free") + 
+  geom_line() + facet_wrap(~group, scales = "free", ncol = 5) + 
   theme(axis.text.x = element_text(angle=70, size = 6, hjust = 1)) +
   labs(x = "category", y = "percentage", linetype = "data set") + 
   scale_y_continuous(labels = scales::percent)
 ```
+
+Figure \@ref(fig:data) show us the voter demographics from the VSG data (@citeVSG) vs the ACS data (@citeIPUMS).
+
 
 ```{r data2, echo = F, message=F, warning=F, fig.cap="More Demographics of Sample and Population"}
 variables2 <- rbind(education, education_post,
@@ -155,6 +160,7 @@ variables2 %>% ggplot(aes(as.factor(level), pct, group=as.factor(type), linetype
   scale_y_continuous(labels = scales::percent)
 ```
 
+Figure \@ref(fig:data2) show us more of the voter demographics from the VSG data (@citeVSG) vs the ACS data (@citeIPUMS).
 
 # Model
 
@@ -179,40 +185,70 @@ We are running our regression model using the glm() function in R (@citeR). The 
 Our model does have some weaknesses, since the output must be binary, we cannot account for other candidates or a person deciding not to vote. This issue isn't too large because our main goal is to determine which of the two main candidates will be chosen by the people of America. Another weakness our model does encounter is that 
 
 ```{r model, echo = F, message=F, warning=F, fig.cap="Results of Regression Model"}
-polling <- polling %>% 
-  mutate(hispanic_test = ifelse(hispan == "not hispanic", 0, 1))
-post_strat <- post_strat %>% 
-  mutate(hispanic_test = ifelse(hispan == "not hispanic", 0, 1))
-
 model2 <- glm(vote_biden ~ sex + age_groups + races +
-               stateicp + hispanic_test + education_level, 
+               stateicp + education_level + hispan, 
              data = polling, family = binomial())
 
-broom::tidy(model2)
+coefficients <- broom::tidy(model2, conf.int = T)
 
-#gtsummary::tbl_regression(model)
+#gtsummary::tbl_regression(model2)
 ```
 
-This table was created using the results from our model and the tbl_regression function from @citeGT
+
+```{r coefficients, echo=F, message=F, warning=F, fig.height=4, fig.cap="Coefficient Estimates"}
+coefficients %>% ggplot(aes(estimate, term)) +
+  geom_point() +
+  geom_errorbar(aes(xmin = conf.low, xmax = conf.high)) +
+  labs(title = "Coefficient Estimates",
+       x = "Estimate", y = "Coefficient")
+```
+
+Figure \@ref(coefficients) show us... using the polling data (@citeVSG).
+
+# Results
 
 ```{r prediction, echo=F, warning=F, message=F}
+# get proportions by demographic, then find proportion of each cell relative to population
 props <- post_strat %>% 
-  group_by(stateicp, races, age_groups, hispanic_test,
-           sex, education_level) %>% 
+  group_by(stateicp, races, age_groups,
+           sex, education_level, hispan) %>% 
   summarise(n = n()) %>% 
   group_by(stateicp) %>% 
   mutate(prop = n/sum(n))
 
-sum(props$prop)
-
+# generate predictions for each of our grouped cells
 props$estimate <- predict.glm(model2, newdata = props,
                           type = "response")
 
-sum(props$prop)
+# create a new column with number of voters from each cell voting Biden
+props <- props %>% mutate(num_voters = n*estimate)
 
-voting_biden <- props %>% mutate(biden_predict_prop=estimate*prop) %>%
+# get errors for our prediction
+errors <- predict.glm(model2, newdata = props,
+                      type = "response", se.fit = T)
+lower <- errors$fit - errors$se.fit
+upper <- errors$fit + errors$se.fit
+
+
+# combine the proportions and the errors we generated
+props_error <- cbind(props, lower, upper)
+props_error <- props_error %>% 
+  rename("lower" = ...11,
+         "upper" = ...12)
+
+# create a new column with number of voters from each cell voting Biden
+props_error <- props_error %>% mutate(num_voters_lower = n*lower,
+                                num_voters_upper = n*upper)
+
+# create a new dataset which contains upper and lower estimates for proportions
+# of votes for each state
+voting_biden <- props_error %>% mutate(biden_predict_prop=estimate*prop,
+                                       biden_predict_prop_lower = lower*prop,
+                                       biden_predict_prop_upper = upper*prop) %>%
   group_by(stateicp) %>%
-  summarise(biden_predict = sum(biden_predict_prop))
+  summarise(biden_predict = sum(biden_predict_prop),
+            biden_predict_lower = sum(biden_predict_prop_lower),
+            biden_predict_upper = sum(biden_predict_prop_upper))
 ```
 
 
@@ -220,46 +256,124 @@ voting_biden <- props %>% mutate(biden_predict_prop=estimate*prop) %>%
 # Results
 
 ```{r stateplot, echo=F, message=F, warning=F, fig.cap="Proportion of each State Voting for Biden"}
+# get state by state proportions for our polling data
+polling_props <- polling %>% 
+  group_by(stateicp, vote_biden) %>% 
+  summarise(n = n()) %>% 
+  mutate(prop = n/sum(n)) 
 
-# plot for predictions, still need to code pre-model data and error bars
+# combine the polling data proportions with the post-stratification data
+poll_post_biden <- inner_join(polling_props, voting_biden, by = "stateicp")
+poll_post_biden <- poll_post_biden %>% 
+  filter(vote_biden == 1)
 
-voting_biden %>% 
+# plot for predictions
+
+poll_post_biden %>% 
   ggplot(aes(x = stateicp, y = biden_predict)) +
-  geom_point() +
-  geom_line() +
+  geom_point(aes(color = "black")) +
+  geom_line(aes(group = 1)) +
   scale_y_continuous(labels = scales::percent) +
-  theme(axis.text.x = element_text(angle = 70, size = 6, hjust = 1))
+  theme(axis.text.x = element_text(angle = 70, size = 6, hjust = 1)) +
+  geom_ribbon(aes(group = 1, ymin=biden_predict_lower, ymax=biden_predict_upper), 
+              alpha = 0.2, fill = "red") +
+  geom_line(data = poll_post_biden, aes(x=stateicp, y=prop, group = 2), 
+            linetype = "dashed") +
+  geom_point(data = poll_post_biden, aes(x=stateicp, y=prop, colour = "red")) +
+  geom_hline(aes(yintercept = 0.5), linetype = "dashed") +
+  scale_color_discrete(name = "Data", labels = c("Population", "Sample")) +
+  labs(title = "Proportion of People voting for Joe Biden by State",
+       x = "State", y = "Percentage Voting Biden")
+```
 
 
+Figure \@ref(fig:stateplot) show us...
+
+```{r statemap, echo=F, message=F, warning=F, fig.cap="Proportion of Voters from Each State Voting Joe Biden"}
 # plot state map
 
 voting_biden %>% 
   mutate(statename = str_to_title(stateicp)) %>% 
   ggplot(aes(fill = biden_predict, state = statename)) + 
   geom_statebins() + 
-  scale_fill_gradient2(low = "red", high = "blue", midpoint = 0.5) +
+  scale_fill_gradient2(low = "#d12531", high = "#244999",
+                       mid = "white", midpoint = mean(voting_biden$biden_predict)) +
   theme_classic() +
   theme(axis.line = element_blank(),
         axis.text = element_blank(),
         axis.ticks = element_blank()) +
-  labs(fill = "Proportion Voting \n for Biden")
+  labs(fill = "Proportion Voting \nfor Biden",
+       title = "Map of the USA and which states plan to support Joe Biden or Donald Trump")
 ```
 
-```{r elec college, echo=F, message=F, warning=F}
+Figure \@ref(statemap) is an amazing view of all the states and which candidate they are leaning towards voting for. We see that states like Vermont, Conneticut and California are some of the more "blue" states, meaning they plan to vote for Joe Biden, while North Dakota, Arkansas and Idaho are the "red" states, planning to vote for Donald Trump. The states that are more white in colour can be the most important for the race when it comes to deciding an actual winner through the electoral college. We see that Florida, Louisiana and New Hampshire are some of the more undecided states, and a switch in these states, can influence the election greatly.
+
+```{r colleges, echo=F, message=F, warning=F}
+# merge our electoral college data with predictions from model
 states_biden_prop <- voting_biden %>%
   rename("State" = stateicp)
 states_college <- inner_join(states_biden_prop, elec_college, by = "State")
 
+# create new variables finding the upper, lower and mean prediction for number of colleges
 states_college <- states_college %>% 
-  mutate(biden_collges = round(Number_of_colleges*biden_predict))
+  mutate(biden_collges = case_when(
+    State == "Nebraska" ~ round(biden_predict*Number_of_colleges),
+    State == "Maine" ~ round(biden_predict*Number_of_colleges),
+    State != "Maine" | State != "Nebraska" ~ ifelse(biden_predict >= 0.5, Number_of_colleges, 0)
+  ),
+  biden_collges_lower = case_when(
+    State == "Nebraska" ~ round(biden_predict_lower*Number_of_colleges),
+    State == "Maine" ~ round(biden_predict_lower*Number_of_colleges),
+    State != "Maine" | State != "Nebraska" ~ ifelse(biden_predict_lower >= 0.5, Number_of_colleges, 0)),
+  biden_collges_upper = case_when(
+    State == "Nebraska" ~ round(biden_predict_upper*Number_of_colleges),
+    State == "Maine" ~ round(biden_predict_upper*Number_of_colleges),
+    State != "Maine" | State != "Nebraska" ~ ifelse(biden_predict_upper >= 0.5, Number_of_colleges, 0)))
 
-sum(states_college$biden_collges)
+
+# compile upper, lower and mean number of colleges won, plus proportion of popular vote 
+biden_upper <- c(round(sum(states_college$biden_collges_upper)), 
+                 (round(100*sum(props_error$num_voters_upper)/sum(props_error$n),1)))
+biden_mid <- c(round(sum(states_college$biden_collges)), 
+                 (round(100*sum(props_error$num_voters)/sum(props_error$n), 1)))
+biden_lower <- c(round(sum(states_college$biden_collges_lower)), 
+                 (round(100*sum(props_error$num_voters_lower)/sum(props_error$n), 1)))
+
+# create a dataframe with all three estimates and create a table displaying the estimates
+estimates <- tibble("Lower Estimate" = biden_lower, "Mean Estimate" = biden_mid, "Upper Estimate" = biden_upper)
+rownames(estimates) <- c("Number of Colleges", "Proportion of Vote")
+knitr::kable(estimates, caption = "Joe Biden Voting Result Estimates")
 ```
 
+Table \@ref(tab:colleges) shows the lower, mean and upper predictions for the results of the election for Joe Biden. We see that on the lower end, Biden can expect to get 45.8% of the popular vote while only getting 191 electoral colleges. We also see that our middle estimate says Biden will get 51% of the popular vote while still losing the election by getting only 260 colleges. Lastly, on the upper estimate for Biden's results, he can get 56.3% of the popular vote while getting 423 college! This truly shows how close this election is, as we can see in Figure \@ref(fig:stateplot), many states are hovering around the 50% mark, which shows the colleges can go either way.
 
+```{r votingscales, echo=F, message=F, warning=F, fig.height=3, fig.cap="Proportion of Biden votes by state"}
+poll_post_biden %>% ggplot(aes(biden_predict, stateicp)) +
+  geom_point() +
+  geom_errorbar(aes(xmin = biden_predict_lower, xmax = biden_predict_upper)) +
+  geom_vline(xintercept = 0.5, linetype = "dashed", color = "red") +
+  labs(title = "Estimated Proportion of State Voting for Joe Biden",
+       x = "Percentage", y= "State") +
+  scale_x_continuous(labels = scales::percent)
+```
 
-This plot was created using @citeStatebins
+Figure \@ref(fig:votingscales) is a different view of Figure \@ref(fig:stateplot), this time only focusing on the predictions for each state with the errors included. We see that many states have error bars overlapping the 50% line, showing that many states are a toss up, given the nature of the electoral college. 
 
+```{r cooks, echo=F, message=F, warning=F, fig.cap="Cook's Distance Plot for Model"}
+plot(model2, which = 4, id.n = 3)
+```
+
+Figure \@ref(fig:cooks) shows the cooks distance for observations in our polling data set. Cook's distance is useful for checking if a model is working correctly because it tells us how far a point is from the predicted value of it, telling us which points negatively impact our model. Figure \@ref(fig:cooks) takes all observations of our polling data (@citeVSG), and calculates the Cook's distance for it, showing which points can hurt the results of our model. We find that out of the 5200 obsevations, there aren't too many points that deviate from what we predict. This makes sense for our model because in the real world, there are some people who will support Donald Trump or Joe Biden, even if they don't "fit" the usual voter demographic for the candidate. Since the number of observations with large Cook's Distances are low, we can conclude that our model is fairly strong. 
+
+```{r residuals, echo=F, message=F, warning=F, fig.cap="Residual Plot for Model"}
+model.data <- augment(model2) %>% 
+  mutate(index = 1:n()) 
+ggplot(model.data, aes(index, .std.resid)) + 
+  geom_point(aes(color = vote_biden), alpha = .5) +
+  theme_bw()
+```
+
+Figure \@ref(fig:residuals) shows us the...
 
 # Discussion
 

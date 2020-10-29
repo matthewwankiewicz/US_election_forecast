@@ -92,7 +92,8 @@ reduced_data1_new <- reduced_data1 %>% filter(inctot < 9999999) %>%
   ),
   races = ifelse(race == "white", "white",
                  ifelse(race == "black/african american/negro", "black",
-                        ifelse(race == "other race, nec", "other race, nec", "asian")))
+                        ifelse(race == "other race, nec", "other race, nec", "asian"))),
+  speak_english = ifelse(language == "english", 1, 0)
   )
 
 
