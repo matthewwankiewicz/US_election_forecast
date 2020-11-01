@@ -81,8 +81,8 @@ reduced_data1_new <- reduced_data1 %>% filter(inctot < 9999999) %>%
     educd == "12th grade, no diploma" ~ "High school or lower",
     educd == "regular high school diploma" ~ "High school or lower",
     educd == "ged or alternative credential" ~ "High school or lower",
-    educd == "some college, but less than 1 year" ~ "Completed some college, but no degree",
-    educd == "1 or more years of college credit, no degree" ~ "Completed some college, but no degree",
+    educd == "some college, but less than 1 year" ~ "Some post secondary",
+    educd == "1 or more years of college credit, no degree" ~ "Some post secondary",
     educd == "associate's degree, type not specified" ~ "Post Secondary or Higher",
     educd == "bachelor's degree" ~ "Post Secondary or Higher",
     educd == "master's degree" ~ "Post Secondary or Higher",
@@ -93,14 +93,13 @@ reduced_data1_new <- reduced_data1 %>% filter(inctot < 9999999) %>%
   races = ifelse(race == "white", "white",
                  ifelse(race == "black/african american/negro", "black",
                         ifelse(race == "other race, nec", "other race, nec", "asian"))),
-  speak_english = ifelse(language == "english", 1, 0)
+  hispanic = ifelse(hispan == "not hispanic", "not hispanic", "hispanic")
   )
 
 
 reduced_data1_new$education_level <- as.factor(reduced_data1_new$education_level)
 reduced_data1_new$races <- as.factor(reduced_data1_new$races)
-
-
+reduced_data1_new$hispanic <- as.factor(reduced_data1_new$hispanic)
 
 write_rds(reduced_data1_new, "outputs/paper/post_strat.rds")
 

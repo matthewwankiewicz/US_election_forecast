@@ -77,10 +77,7 @@ reduced_data_new <- reduced_data %>% filter(vote_2020 == "Joe Biden" | vote_2020
     race_ethnicity == "Pacific Islander (Other)" ~ "asian",
     race_ethnicity == "Some other race" ~ "other race, nec"
   ),
-  hispan = ifelse(hispanic == "Not Hispanic", "not hispanic",
-                  ifelse(hispanic == "Mexican", "mexican", 
-                         ifelse(hispanic == "Puerto Rican", "puerto rican",
-                                ifelse(hispanic == "Cuban", "cuban", "other")))),
+  hispanic = ifelse(hispanic == "Not Hispanic", "not hispanic", "hispanic"),
   empstat = case_when(
     employment == "Full-time employed" ~ "employed",
     employment == "Part-time employed" ~ "employed",
@@ -98,7 +95,7 @@ reduced_data_new <- reduced_data %>% filter(vote_2020 == "Joe Biden" | vote_2020
     education == "Completed some high school" ~ "High school or lower",
     education == "High school graduate" ~ "High school or lower",
     education == "Other post high school vocational training" ~ "High school or lower",
-    education == "Completed some college, but no degree" ~ "Completed some college, but no degree",
+    education == "Completed some college, but no degree" ~ "Some post secondary",
     education == "Associate Degree" ~ "Post Secondary or Higher",
     education == "College Degree (such as B.A., B.S.)" ~ "Post Secondary or Higher",
     education == "Completed some graduate, but no degree" ~ "Post Secondary or Higher",
@@ -127,8 +124,8 @@ reduced_data_new$stateicp <- replace_na(reduced_data_new$stateicp, "district of 
 reduced_data_new$sex <- as.factor(reduced_data_new$sex)
 reduced_data_new$races <- as.factor(reduced_data_new$races)
 reduced_data_new$stateicp <- as.factor(reduced_data_new$stateicp)
-reduced_data_new$hispan <- as.factor(reduced_data_new$hispan)
 reduced_data_new$education_level <- as.factor(reduced_data_new$education_level)
+reduced_data_new$hispanic <- as.factor(reduced_data_new$hispanic)
 
 
 write_rds(reduced_data_new, "outputs/paper/polling_data.rds")

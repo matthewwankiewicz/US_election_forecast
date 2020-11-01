@@ -1,14 +1,15 @@
 ---
 title: "Joe Biden projected to win Popular Vote in 2020 US Election with 51% of Vote"
+subtitle: "4 percent margin of error"
 author: "Alen Mitrovski, Xiaoyan Yang, Matthew Wankiewicz"
 date: "November 2nd, 2020"
-abstract: |
-  | First sentence. Second sentence. Third sentence. Fourth sentence.
-  |
-  | **Keywords:** Forecasting, US 2020 Election, Trump, Biden, multilevel regression with post-stratification;
+abstract: It seems like everyone has been waiting for the 2020 election, almost as soon as Donald Trump won in 2016. In our report, we use a logistic regression model along with multilevel regression  with post-stratification in order to predict who will win the election. According to our model, we predict that Joe Biden will win the popular vote over Donald Trump, 51% to 49%. These results are promising for the people of the United States, as they may be getting the change in President they need.
+keywords: Forecasting, US 2020 Election, Trump, Biden, multilevel regression with post-stratification;
 output:
   bookdown::pdf_document2:
     citation_package: natbib
+    includes:  
+      in_header: my_header.tex
 toc: FALSE
 bibliography: references.bib
 ---
@@ -18,12 +19,16 @@ bibliography: references.bib
 #install.packages("gtsummary")
 #install.packages("statebins")
 #install.packages("broom")
+##install.packages("kableExtra")
 library(tidyverse)
 library(statebins)
 library(broom)
+library(kableExtra)
 ```
 
 ```{r, echo=F, message=F, warning=F}
+# |**Keywords:** Forecasting, US 2020 Election, Trump, Biden, multilevel regression with post-stratification;
+
 # read in the polling data
 polling <- readRDS("polling_data.rds")
 
@@ -86,11 +91,11 @@ statesicp <- polling %>%
    rename(level = stateicp)
 
 hispanic <- polling %>% 
-  group_by(hispan) %>% 
+  group_by(hispanic) %>% 
   summarise(n = n()) %>% 
   mutate(pct = n/sum(n), type = "poll",
          group = "hispanic") %>% 
-   rename(level = hispan)
+   rename(level = hispanic)
 
 # set up proportions for post-strat data
 
@@ -130,25 +135,25 @@ statesicp_post <- post_strat %>%
   rename(level = stateicp)
 
 hispanic_post <- post_strat %>% 
-  group_by(hispan) %>% 
+  group_by(hispanic) %>% 
   summarise(n = n()) %>% 
   mutate(pct = n/sum(n), type = "post_strat",
          group = "hispanic") %>% 
-  rename(level = hispan)
+  rename(level = hispanic)
 
 variables <- rbind(hispanic, hispanic_post,
              age, age_post, gender, gender_post, 
              races, races_post)
 
 variables %>% ggplot(aes(as.factor(level), pct, group=as.factor(type), linetype = as.factor(type))) + 
-  geom_line() + facet_wrap(~group, scales = "free", ncol = 5) + 
+  geom_line() + facet_grid(~group, scales = "free") + 
   theme(axis.text.x = element_text(angle=70, size = 6, hjust = 1)) +
   labs(x = "category", y = "percentage", linetype = "data set") + 
-  scale_y_continuous(labels = scales::percent)
+  scale_y_continuous(labels = scales::percent) +
+  geom_hline(yintercept = 0.5, alpha = 0.35)
 ```
 
-Figure \@ref(fig:data) show us the voter demographics from the VSG data (@citeVSG) vs the ACS data (@citeIPUMS).
-
+Figure \@ref(fig:data1) show us the voter demographics from the VSG data (@citeVSG) vs the ACS data (@citeIPUMS).
 
 ```{r data2, echo = F, message=F, warning=F, fig.cap="More Demographics of Sample and Population"}
 variables2 <- rbind(education, education_post,
@@ -160,50 +165,67 @@ variables2 %>% ggplot(aes(as.factor(level), pct, group=as.factor(type), linetype
   scale_y_continuous(labels = scales::percent)
 ```
 
-Figure \@ref(fig:data2) show us more of the voter demographics from the VSG data (@citeVSG) vs the ACS data (@citeIPUMS).
+Figure \@ref(fig:data2) shows us more of the voter demographics from the VSG data (@citeVSG) vs the ACS data (@citeIPUMS).
 
 # Model
 
-In order to predict whether or not a person plans to vote for Joe Biden or Donald Trump, we plan to use logistic regression. Since logistic regression only works for binary response variables, we used a variable we created called `vote_biden` which returns a 1 is the respondent plan to vote for Joe Biden and a 0 if they don't (in this scenario we assume that they are voting for Donald Trump). The logistic regression model takes the form of:
+In order to predict whether or not a person plans to vote for Joe Biden or Donald Trump, we plan to nuild a logistic regression model using data from the Voter Study Group (@citeVSG) and then post-stratify it using Census Data (@citeIPUMS). Since logistic regression only works for binary response variables, we used a variable we created called `vote_biden` which returns a 1 is the respondent plan to vote for Joe Biden and a 0 if they don't (in this scenario we assume that they are voting for Donald Trump). The logistic regression model takes the form of:
 
-$$  
-log(\frac{\hat{p}}{1 - \hat{p}}) = \beta_{0} + \beta_{1}x_{sex} + 
+\begin{equation} 
+  log(\frac{\hat{p}}{1 - \hat{p}}) = \beta_{0} + \beta_{1}x_{sex} + 
 \beta_{2}x_{agegroup} + \beta_{3}x_{race} + \beta_{4}x_{state} + \beta_{5}x_{income} + \beta_{6}x_{hispanic}
-$$
-In the equation above, each $\beta$ represents a coefficient that the regression model will compute for us. As for our variables, we have chosen to use sex, age, race, income, state, and whether the respondent is hispanic. We decided to use the first 3 because they are generally strong predictors of which candidate a person would support, such as how some states tend to vote republican year after year while some states flip between democratic and republican almost every election. Next, we decided to choose income, because Joe Biden has made claims to increase taxes on the rich, which may influence their support for him. Lastly, we wanted to focus on whether the respondent was hispanic and if so, where they were from. This variable was important for our predictions because we know how poorly Donald Trump has spoken of hispanic people and we believe they could have a strong impact on the election.
+  (\#eq:logit)
+\end{equation} 
 
-The output of the logistic regression model will give us a probability of whether or not a voter plans to vote for Joe Biden or not. In order to find this probability, we take the sum of the right side of the equation and plug it into the equation below:
+Once we have our regression model, we will use the `predict` function in R (@citeR), to apply our model to the Census data (@citeIPUMS). We do this by grouping the Census data by the demographics we plan to analyze (sex, race, age, education level, hispanic or not, state), and then applying the model to each of those groups. After applying the model, we will receive probabilities that a person in that group will vote for Joe Biden. Once the predictions are complete, we can use them to find out who will win the popular vote or how many electoral colleges a candidate will win. We also can use a 95 percent confidence interval, which means that we are 95% certain that true value for the population (in this case popular vote percentage), is within the range we obtain. From this we can also conclude that our results will be accurate between +/- 5%.  
 
-$$
-\frac{e^{sum}}{1+e^{sum}}
-$$
+In equation \@ref(eq:logit), each $\beta$ represents a coefficient that the regression model will compute for us. As for our variables, we have chosen to use sex, age, race, income, state, and whether the respondent is hispanic. We decided to use the first 3 because they are generally strong predictors of which candidate a person would support, such as how some states tend to vote republican year after year while some states flip between democratic and republican almost every election. Next, we decided to choose income, because Joe Biden has made claims to increase taxes on the rich, which may influence their support for him. Lastly, we wanted to focus on whether the respondent was hispanic and if so, where they were from. This variable was important for our predictions because we know how poorly Donald Trump has spoken of hispanic people and we believe they could have a strong impact on the election.
 
-This equation is just a manipulation of the initial equation, where e is the exponential equation ad sum is the sum of the right side of equation 1. We see that as the sum of the right side increases, the probability that a person will vote for Joe Biden increases as well. 
+The output of the logistic regression model will give us a probability of whether or not a voter plans to vote for Joe Biden or not. In order to find this probability, we take the sum of the right side of equation \@ref(eq:logit) and plug it into the equation below:
 
-We are running our regression model using the glm() function in R (@citeR). The decision to run this model over other models like linear regression was made by the fact that we were predicting a binary variable about a voter's decision. Since there are only two possible options our data will likely follow an S shape and a straight line equation will not be helpful to model this relationship. 
+\begin{equation} 
+  \frac{e^{sum}}{1+e^{sum}}
+  (\#eq:prob)
+\end{equation} 
 
-Our model does have some weaknesses, since the output must be binary, we cannot account for other candidates or a person deciding not to vote. This issue isn't too large because our main goal is to determine which of the two main candidates will be chosen by the people of America. Another weakness our model does encounter is that 
+Equation \@ref(eq:prob) is just a manipulation of the equation \@ref(eq:logit), where $e$ is the exponential equation and $sum$ is the sum of the right side of equation \@ref(eq:logit). We see that as the sum of the right side increases, the probability that a person will vote for Joe Biden increases as well. 
+We are running our regression model using the `glm()` function in R (@citeR). The decision to run this model over other models like linear regression was made by the fact that we were predicting a binary variable about a voter's decision. Since there are only two possible options our data will likely follow an S shape and a straight line equation will not be helpful to model this relationship. Another strength present for logistic regression is that when combined with post-stratification it allows us to take information from under-represented populations and it allows their views to be accounted for more greatly. For example, our polling data (@citeVSG), includes only 2 observations from Wyoming, but using multilevel regression with post-stratification, we can have that expanded to over 3000 people!
+
+Our model does have some weaknesses, since the output must be binary, we cannot account for other candidates or a person deciding not to vote. This issue isn't too large because our main goal is to determine which of the two main candidates will be chosen by the people of America. Another weakness our model does encounter is that ...
 
 ```{r model, echo = F, message=F, warning=F, fig.cap="Results of Regression Model"}
-model2 <- glm(vote_biden ~ sex + age_groups + races +
-               stateicp + education_level + hispan, 
+model <- glm(vote_biden ~ sex + age_groups + races +
+               stateicp + education_level + hispanic, 
              data = polling, family = binomial())
 
-coefficients <- broom::tidy(model2, conf.int = T)
+coefficients <- broom::tidy(model, conf.int = T)
 
-#gtsummary::tbl_regression(model2)
+knitr::kable(coefficients,
+             caption = "Coefficients from the Model") %>% 
+  kableExtra::kable_styling(latex_options = "scale_down")
 ```
 
+
+Table \@ref(tab:model), shows the estimates for the coefficients that will fit into our logistic regression equation. These coefficients will fit into Equation \@ref(eq:logit), and were calculated using data from the Voter Study Group (@citeVSG). The table is made using `kable` from `knitr` (@citeKnitr) and is formatted using `kableExtra` (@citekableExtra)
 
 ```{r coefficients, echo=F, message=F, warning=F, fig.height=4, fig.cap="Coefficient Estimates"}
 coefficients %>% ggplot(aes(estimate, term)) +
   geom_point() +
   geom_errorbar(aes(xmin = conf.low, xmax = conf.high)) +
   labs(title = "Coefficient Estimates",
-       x = "Estimate", y = "Coefficient")
+       x = "Estimate", y = "Coefficient") +
+  theme(axis.text.y = element_text(size = 6))
 ```
 
-Figure \@ref(coefficients) show us... using the polling data (@citeVSG).
+Figure \@ref(fig:coefficients) show us the coefficients that would fit into equation \@ref(eq:logit) using the polling data (@citeVSG). We also have error bars present, which show the upper and lower estimates for the coefficients. What we have to look out for in this scenario is that coefficients with negative values would mean that the person is more likely to vote for Donald Trump (with that characteristic) and positive values mean the person is more likely to vote for Joe Biden. Table \@ref(tab:model) shows a numerical view of Figure \@ref(fig:coefficients), along with p-values. 
+
+Using the outputs of the logisitic regression model, we can get an equation that follows the form of \@ref(eq:logit), but with the $\beta$ values filled out. This equation is difficult to write out because of the many variables, but in short, if the person's characteristic fits in with a certain variable, it is used in the equation. Then the equation is summed up and the probability is found using equation \@ref(eq:prob).
+
+```{r cooks, echo=F, message=F, warning=F, fig.cap="Cook's Distance Plot for Model"}
+plot(model, which = 4, id.n = 3)
+```
+
+Figure \@ref(fig:cooks) shows the cooks distance for observations in our polling data set. Cook's distance is useful for checking if a model is working correctly because it tells us how far a point is from the predicted value of it, telling us which points negatively impact our model. Figure \@ref(fig:cooks) takes all observations of our polling data (@citeVSG), and calculates the Cook's distance for it, showing which points can hurt the results of our model. We find that out of the 5200 obsevations, there aren't too many points that deviate from what we predict. This makes sense for our model because in the real world, there are some people who will support Donald Trump or Joe Biden, even if they don't "fit" the usual voter demographic for the candidate. Since the number of observations with large Cook's Distances are low, we can conclude that our model is fairly strong. 
 
 # Results
 
@@ -211,20 +233,20 @@ Figure \@ref(coefficients) show us... using the polling data (@citeVSG).
 # get proportions by demographic, then find proportion of each cell relative to population
 props <- post_strat %>% 
   group_by(stateicp, races, age_groups,
-           sex, education_level, hispan) %>% 
+           sex, education_level, hispanic) %>% 
   summarise(n = n()) %>% 
   group_by(stateicp) %>% 
   mutate(prop = n/sum(n))
 
 # generate predictions for each of our grouped cells
-props$estimate <- predict.glm(model2, newdata = props,
+props$estimate <- predict.glm(model, newdata = props,
                           type = "response")
 
 # create a new column with number of voters from each cell voting Biden
 props <- props %>% mutate(num_voters = n*estimate)
 
 # get errors for our prediction
-errors <- predict.glm(model2, newdata = props,
+errors <- predict.glm(model, newdata = props,
                       type = "response", se.fit = T)
 lower <- errors$fit - errors$se.fit
 upper <- errors$fit + errors$se.fit
@@ -252,8 +274,6 @@ voting_biden <- props_error %>% mutate(biden_predict_prop=estimate*prop,
 ```
 
 
-
-# Results
 
 ```{r stateplot, echo=F, message=F, warning=F, fig.cap="Proportion of each State Voting for Biden"}
 # get state by state proportions for our polling data
@@ -287,7 +307,8 @@ poll_post_biden %>%
 ```
 
 
-Figure \@ref(fig:stateplot) show us...
+Figure \@ref(fig:stateplot) shows us 
+
 
 ```{r statemap, echo=F, message=F, warning=F, fig.cap="Proportion of Voters from Each State Voting Joe Biden"}
 # plot state map
@@ -306,7 +327,7 @@ voting_biden %>%
        title = "Map of the USA and which states plan to support Joe Biden or Donald Trump")
 ```
 
-Figure \@ref(statemap) is an amazing view of all the states and which candidate they are leaning towards voting for. We see that states like Vermont, Conneticut and California are some of the more "blue" states, meaning they plan to vote for Joe Biden, while North Dakota, Arkansas and Idaho are the "red" states, planning to vote for Donald Trump. The states that are more white in colour can be the most important for the race when it comes to deciding an actual winner through the electoral college. We see that Florida, Louisiana and New Hampshire are some of the more undecided states, and a switch in these states, can influence the election greatly.
+Figure \@ref(fig:statemap) is an amazing view of all the states and which candidate they are leaning towards voting for. We see that states like Vermont, Conneticut and California are some of the more "blue" states, meaning they plan to vote for Joe Biden, while North Dakota, Arkansas and Idaho are the "red" states, planning to vote for Donald Trump. The states that are more white in colour can be the most important for the race when it comes to deciding an actual winner through the electoral college. We see that Florida, Louisiana and New Hampshire are some of the more undecided states, and a switch in these states, can influence the election greatly.
 
 ```{r colleges, echo=F, message=F, warning=F}
 # merge our electoral college data with predictions from model
@@ -342,14 +363,16 @@ biden_lower <- c(round(sum(states_college$biden_collges_lower)),
 # create a dataframe with all three estimates and create a table displaying the estimates
 estimates <- tibble("Lower Estimate" = biden_lower, "Mean Estimate" = biden_mid, "Upper Estimate" = biden_upper)
 rownames(estimates) <- c("Number of Colleges", "Proportion of Vote")
-knitr::kable(estimates, caption = "Joe Biden Voting Result Estimates")
+knitr::kable(estimates, caption = "Joe Biden Voting Result Estimates") %>% 
+    kableExtra::kable_styling(latex_options = "scale_down")
 ```
 
-Table \@ref(tab:colleges) shows the lower, mean and upper predictions for the results of the election for Joe Biden. We see that on the lower end, Biden can expect to get 45.8% of the popular vote while only getting 191 electoral colleges. We also see that our middle estimate says Biden will get 51% of the popular vote while still losing the election by getting only 260 colleges. Lastly, on the upper estimate for Biden's results, he can get 56.3% of the popular vote while getting 423 college! This truly shows how close this election is, as we can see in Figure \@ref(fig:stateplot), many states are hovering around the 50% mark, which shows the colleges can go either way.
+Table \@ref(tab:colleges) shows the lower, mean and upper predictions for the results of the election for Joe Biden. We see that on the lower end, Biden can expect to get 46.1% of the popular vote while only getting 191 electoral colleges. We also see that our middle estimate says Biden will get 51% of the popular vote while still losing the election by getting only 260 colleges. Lastly, on the upper estimate for Biden's results, he can get 55.9% of the popular vote while getting 423 colleges! This truly shows how close this election is, as we can see in Figure \@ref(fig:stateplot), many states are hovering around the 50% mark, which shows the colleges can go either way. The number of electoral colleges by state were found on the Britannica Encylopedia's website (@citecolleges).
 
-```{r votingscales, echo=F, message=F, warning=F, fig.height=3, fig.cap="Proportion of Biden votes by state"}
-poll_post_biden %>% ggplot(aes(biden_predict, stateicp)) +
-  geom_point() +
+```{r votingscales, echo=F, message=F, warning=F, fig.cap="Proportion of Biden votes by state"}
+test_plot <- poll_post_biden %>% arrange(desc(biden_predict))
+test_plot %>% ggplot(aes(y = reorder(stateicp, biden_predict), x = biden_predict)) +
+  geom_point(stat = "identity") +
   geom_errorbar(aes(xmin = biden_predict_lower, xmax = biden_predict_upper)) +
   geom_vline(xintercept = 0.5, linetype = "dashed", color = "red") +
   labs(title = "Estimated Proportion of State Voting for Joe Biden",
@@ -358,22 +381,6 @@ poll_post_biden %>% ggplot(aes(biden_predict, stateicp)) +
 ```
 
 Figure \@ref(fig:votingscales) is a different view of Figure \@ref(fig:stateplot), this time only focusing on the predictions for each state with the errors included. We see that many states have error bars overlapping the 50% line, showing that many states are a toss up, given the nature of the electoral college. 
-
-```{r cooks, echo=F, message=F, warning=F, fig.cap="Cook's Distance Plot for Model"}
-plot(model2, which = 4, id.n = 3)
-```
-
-Figure \@ref(fig:cooks) shows the cooks distance for observations in our polling data set. Cook's distance is useful for checking if a model is working correctly because it tells us how far a point is from the predicted value of it, telling us which points negatively impact our model. Figure \@ref(fig:cooks) takes all observations of our polling data (@citeVSG), and calculates the Cook's distance for it, showing which points can hurt the results of our model. We find that out of the 5200 obsevations, there aren't too many points that deviate from what we predict. This makes sense for our model because in the real world, there are some people who will support Donald Trump or Joe Biden, even if they don't "fit" the usual voter demographic for the candidate. Since the number of observations with large Cook's Distances are low, we can conclude that our model is fairly strong. 
-
-```{r residuals, echo=F, message=F, warning=F, fig.cap="Residual Plot for Model"}
-model.data <- augment(model2) %>% 
-  mutate(index = 1:n()) 
-ggplot(model.data, aes(index, .std.resid)) + 
-  geom_point(aes(color = vote_biden), alpha = .5) +
-  theme_bw()
-```
-
-Figure \@ref(fig:residuals) shows us the...
 
 # Discussion
 
