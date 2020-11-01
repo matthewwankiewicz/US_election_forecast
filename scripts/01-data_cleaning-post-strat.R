@@ -13,14 +13,9 @@
 library(haven)
 library(tidyverse)
 # Read in the raw data. 
-raw_data1 <- read_dta("inputs/data/usa_00001.dta"
-)
+raw_data1 <- read_dta("inputs/data/usa_00001.dta")
 # Add the labels
 raw_data1 <- labelled::to_factor(raw_data1)
-
-# Just keep some variables that may be of interest (change 
-# this depending on your interests)
-names(raw_data1)
 
 reduced_data1 <- 
   raw_data1 %>% 
@@ -42,18 +37,25 @@ reduced_data1 <-
 rm(raw_data1)
 
 
-#### What's next? ####
+# convert ages into numeric, easier to group in later steps
 
 reduced_data1$age <- as.numeric(reduced_data1$age)
 
 # format IPUMS data set so it can match the survey data we have
-# must drop NAs because majority of them are just Alabama State and 
+# must drop NAs because majority of them are just Alabama as the state and 
 # people under 18
-
-# professional degree beyond a bachelor's degree was included with masters degree
 
 # filter out income total of 9999999, many responses were left blank for these
 # respodents
+
+# group ages into four groups; under 35, 36-49, 50-65 and 65+
+# group education levels into 3 groups; high school or lower, some post-secondary and
+# post-secondary or higher. Demographics were grouped into these 3 groups because 
+# the model was messy when more groups were included and because the tendenices between
+# these groups were similar.
+# group races into four categories, many races in the asian category had very few observations
+# made our results cleaner to just divide them into four
+# lastly, make hispanic a binary variable, because once again many groups were present
 
 reduced_data1_new <- reduced_data1 %>% filter(inctot < 9999999) %>% 
   filter(race != "two major races", race != "three or more major races",
@@ -96,12 +98,16 @@ reduced_data1_new <- reduced_data1 %>% filter(inctot < 9999999) %>%
   hispanic = ifelse(hispan == "not hispanic", "not hispanic", "hispanic")
   )
 
+# change our new variables into factors as it is easier to plot and group
 
 reduced_data1_new$education_level <- as.factor(reduced_data1_new$education_level)
 reduced_data1_new$races <- as.factor(reduced_data1_new$races)
 reduced_data1_new$hispanic <- as.factor(reduced_data1_new$hispanic)
 
-write_rds(reduced_data1_new, "outputs/paper/post_strat.rds")
+
+# write our file into our outputs folder under post_strat.rds
+
+write_rds(reduced_data1_new, "outputs/paper/data/post_strat.rds")
 
 
 

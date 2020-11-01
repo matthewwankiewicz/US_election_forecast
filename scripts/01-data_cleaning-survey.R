@@ -40,16 +40,21 @@ reduced_data <-
          language)
 
 
-#### What else???? ####
-# Maybe make some age-groups?
-# Maybe check the values?
-# Is vote a binary? If not, what are you going to do?
+# add this in order to clean state names to match the IPUMS data
 
 names_matcher <- tibble(stateicp = state.name, state = state.abb)
 
-# group voter ages by intervals of 10 years or so
 # filter out people that are undecided or who will vote someone else, then create a variable called
 # vote_biden gives a 1 if they vote for Biden, 0 for Trump
+# group ages into four groups; under 35, 36-49, 50-65 and 65+
+# reformat the sex variable, rename it and make responses lowercase
+# group education levels into 3 groups; high school or lower, some post-secondary and
+# post-secondary or higher. Demographics were grouped into these 3 groups because 
+# the model was messy when more groups were included and because the tendenices between
+# these groups were similar.
+# group races into four categories, many races in the asian category had very few observations
+# made our results cleaner to just divide them into four
+# lastly, make hispanic a binary variable, because once again many groups were present
 
 reduced_data_new <- reduced_data %>% filter(vote_2020 == "Joe Biden" | vote_2020 == "Donald Trump") %>% 
   mutate(age_groups = case_when(
@@ -78,17 +83,6 @@ reduced_data_new <- reduced_data %>% filter(vote_2020 == "Joe Biden" | vote_2020
     race_ethnicity == "Some other race" ~ "other race, nec"
   ),
   hispanic = ifelse(hispanic == "Not Hispanic", "not hispanic", "hispanic"),
-  empstat = case_when(
-    employment == "Full-time employed" ~ "employed",
-    employment == "Part-time employed" ~ "employed",
-    employment == "Self-employed" ~ "employed",
-    employment == "Homemaker" ~ "not in labor force",
-    employment == "Retired" ~ "not in labor force",
-    employment == "Student" ~ "not in labor force",
-    employment == "Permanently disabled" ~ "not in labor force",
-    employment == "Other:" ~ "not in labor force",
-    employment == "Unemployed or temorarily on layoff" ~ "unemployed"
-  ),
   education_level = case_when(
     education == "3rd Grade or less" ~ "High school or lower",
     education == "Middle School - Grades 4 - 8" ~ "High school or lower",
@@ -101,8 +95,7 @@ reduced_data_new <- reduced_data %>% filter(vote_2020 == "Joe Biden" | vote_2020
     education == "Completed some graduate, but no degree" ~ "Post Secondary or Higher",
     education == "Masters degree" ~ "Post Secondary or Higher",
     education == "Doctorate degree" ~ "Post Secondary or Higher",
-  ),
-  speak_english = ifelse(language == "No, we speak only English.", 1, 0)
+  )
   )
 
 # format state names so the whole state name is written out, to match IPUMS data
@@ -127,5 +120,6 @@ reduced_data_new$stateicp <- as.factor(reduced_data_new$stateicp)
 reduced_data_new$education_level <- as.factor(reduced_data_new$education_level)
 reduced_data_new$hispanic <- as.factor(reduced_data_new$hispanic)
 
+# write our new data set into our outputs folder under polling_data.rds
 
-write_rds(reduced_data_new, "outputs/paper/polling_data.rds")
+write_rds(reduced_data_new, "outputs/paper/data/polling_data.rds")

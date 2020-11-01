@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  31 OCT 2020 17:28
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  1 NOV 2020 15:28
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -798,7 +798,7 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) (/usr/local/texlive/2018/texmf-dist/tex/latex/microtype/mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
-<forecasting_us_election_2020_files/figure-latex/data1-1.pdf, id=32, 453.695pt 
+<forecasting_us_election_2020_files/figure-latex/data1-1.pdf, id=36, 453.695pt 
 x 315.1775pt>
 File: forecasting_us_election_2020_files/figure-latex/data1-1.pdf Graphic file 
 (type pdf)
@@ -809,7 +809,7 @@ Package pdftex.def Info: forecasting_us_election_2020_files/figure-latex/data1-
 [1
 
 {/usr/local/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-<forecasting_us_election_2020_files/figure-latex/data2-1.pdf, id=55, 453.695pt 
+<forecasting_us_election_2020_files/figure-latex/data2-1.pdf, id=59, 453.695pt 
 x 315.1775pt>
 File: forecasting_us_election_2020_files/figure-latex/data2-1.pdf Graphic file 
 (type pdf)
@@ -824,142 +824,148 @@ has been already used, duplicate ignored
                                                   \fi \fi 
 l.136 
        <./forecasting_us_election_2020_files/figure-latex/data1-1.pdf>]
-LaTeX Font Info:    Try loading font information for T1+lmtt on input line 142.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <10> on input line 143.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <7> on input line 143.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <5> on input line 143.
+LaTeX Font Info:    Try loading font information for T1+lmtt on input line 159.
 
 (/usr/local/texlive/2018/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
-)
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 144.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 144.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 144.
-[3pdfTeX warning (ext4): destination with the same identifier (name{figure.2}) 
-has been already used, duplicate ignored
+) [3pdfTeX warning (ext4): destination with the same identifier (name{table.1})
+ has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.152 I
-       n equation \eqref{eq:logit}, each \(\beta\) represents a coefficient ...
- <./forecasting_us_election_2020_files/figure-latex/data2-1.pdf>]
+l.165 \end{equation}
+                    pdfTeX warning (ext4): destination with the same identifier
+ (name{figure.2}) has been already used, duplicate ignored
 
-LaTeX Warning: Float too large for page by 45.8912pt on input line 298.
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.165 \end{equation}
+                     <./forecasting_us_election_2020_files/figure-latex/data2-1
+.pdf>]
 
-<forecasting_us_election_2020_files/figure-latex/coefficients-1.pdf, id=121, 45
+LaTeX Warning: Float too large for page by 45.8912pt on input line 315.
+
+<forecasting_us_election_2020_files/figure-latex/coefficients-1.pdf, id=122, 45
 9.7175pt x 277.035pt>
 File: forecasting_us_election_2020_files/figure-latex/coefficients-1.pdf Graphi
 c file (type pdf)
 <use forecasting_us_election_2020_files/figure-latex/coefficients-1.pdf>
 Package pdftex.def Info: forecasting_us_election_2020_files/figure-latex/coeffi
-cients-1.pdf  used on input line 304.
+cients-1.pdf  used on input line 321.
 (pdftex.def)             Requested size: 459.71637pt x 277.03432pt.
-[4] [5pdfTeX warning (ext4): destination with the same identifier (name{table.1
+[4] [5pdfTeX warning (ext4): destination with the same identifier (name{table.2
 }) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.307 
+l.324 
       ]
-<forecasting_us_election_2020_files/figure-latex/cooks-1.pdf, id=143, 460.72125
+<forecasting_us_election_2020_files/figure-latex/cooks-1.pdf, id=150, 460.72125
 pt x 282.05376pt>
 File: forecasting_us_election_2020_files/figure-latex/cooks-1.pdf Graphic file 
 (type pdf)
 <use forecasting_us_election_2020_files/figure-latex/cooks-1.pdf>
 Package pdftex.def Info: forecasting_us_election_2020_files/figure-latex/cooks-
-1.pdf  used on input line 314.
+1.pdf  used on input line 331.
 (pdftex.def)             Requested size: 460.72012pt x 282.05305pt.
 [6pdfTeX warning (ext4): destination with the same identifier (name{figure.3}) 
 has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.317 
+l.334 
        <./forecasting_us_election_2020_files/figure-latex/coefficients-1.pdf>]
-<forecasting_us_election_2020_files/figure-latex/stateplot-1.pdf, id=162, 457.7
+<forecasting_us_election_2020_files/figure-latex/stateplot-1.pdf, id=169, 457.7
 1pt x 313.17pt>
 File: forecasting_us_election_2020_files/figure-latex/stateplot-1.pdf Graphic f
 ile (type pdf)
 <use forecasting_us_election_2020_files/figure-latex/stateplot-1.pdf>
 Package pdftex.def Info: forecasting_us_election_2020_files/figure-latex/statep
-lot-1.pdf  used on input line 325.
+lot-1.pdf  used on input line 342.
 (pdftex.def)             Requested size: 457.72285pt x 313.17877pt.
 [7pdfTeX warning (ext4): destination with the same identifier (name{figure.4}) 
 has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.328 
+l.345 
        <./forecasting_us_election_2020_files/figure-latex/cooks-1.pdf>]
-<forecasting_us_election_2020_files/figure-latex/statemap-1.pdf, id=178, 446.66
+<forecasting_us_election_2020_files/figure-latex/statemap-1.pdf, id=185, 446.66
 875pt x 299.1175pt>
 File: forecasting_us_election_2020_files/figure-latex/statemap-1.pdf Graphic fi
 le (type pdf)
 <use forecasting_us_election_2020_files/figure-latex/statemap-1.pdf>
 Package pdftex.def Info: forecasting_us_election_2020_files/figure-latex/statem
-ap-1.pdf  used on input line 333.
+ap-1.pdf  used on input line 350.
 (pdftex.def)             Requested size: 446.67445pt x 299.12132pt.
 [8pdfTeX warning (ext4): destination with the same identifier (name{figure.5}) 
 has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.336 
+l.353 
        <./forecasting_us_election_2020_files/figure-latex/stateplot-1.pdf>]
 
 Package natbib Warning: Citation `citecolleges' on page 9 undefined on input li
-ne 355.
+ne 372.
 
-<forecasting_us_election_2020_files/figure-latex/votingscales-1.pdf, id=197, 45
+<forecasting_us_election_2020_files/figure-latex/votingscales-1.pdf, id=205, 45
 9.7175pt x 315.1775pt>
 File: forecasting_us_election_2020_files/figure-latex/votingscales-1.pdf Graphi
 c file (type pdf)
 <use forecasting_us_election_2020_files/figure-latex/votingscales-1.pdf>
 Package pdftex.def Info: forecasting_us_election_2020_files/figure-latex/voting
-scales-1.pdf  used on input line 359.
+scales-1.pdf  used on input line 376.
 (pdftex.def)             Requested size: 459.74442pt x 315.19595pt.
-[9pdfTeX warning (ext4): destination with the same identifier (name{table.2}) h
+[9pdfTeX warning (ext4): destination with the same identifier (name{table.3}) h
 as been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.362 
+l.379 
       pdfTeX warning (ext4): destination with the same identifier (name{figure.
 6}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.362 
+l.379 
        <./forecasting_us_election_2020_files/figure-latex/statemap-1.pdf>] (./f
 orecasting_us_election_2020.bbl [10pdfTeX warning (ext4): destination with the 
 same identifier (name{figure.7}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.50 
-      <./forecasting_us_election_2020_files/figure-latex/votingscales-1.pdf>])
+l.1 \begin{thebibliography}{6}
+                               <./forecasting_us_election_2020_files/figure-lat
+ex/votingscales-1.pdf>])
 
 Package natbib Warning: There were undefined citations.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 371.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 411.
 [11]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 371.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 411.
 (./forecasting_us_election_2020.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 371.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 371.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 411.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 411.
 Package rerunfilecheck Info: File `forecasting_us_election_2020.out' has not ch
 anged.
-(rerunfilecheck)             Checksum: CC61FCF762093FEB353DC10091FE105E;405.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 371.
+(rerunfilecheck)             Checksum: 33ACA57604C60215399675D8E9B129F8;468.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 411.
  ) 
 Here is how much of TeX's memory you used:
- 14688 strings out of 492649
- 212743 string characters out of 6129622
- 384191 words of memory out of 5000000
- 18212 multiletter control sequences out of 15000+600000
- 60870 words of font info for 97 fonts, out of 8000000 for 9000
+ 14694 strings out of 492649
+ 212787 string characters out of 6129622
+ 387186 words of memory out of 5000000
+ 18213 multiletter control sequences out of 15000+600000
+ 60953 words of font info for 98 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 34i,10n,38p,975b,443s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 34i,10n,38p,975b,351s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2018/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/local/
 texlive/2018/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/usr/local/texlive/20
 18/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2018/texmf-dist/
@@ -975,10 +981,10 @@ ic/lm/lmr7.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmr9.p
 fb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmri10.pfb></usr/l
 ocal/texlive/2018/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></usr/local/texli
 ve/2018/texmf-dist/fonts/type1/public/lm/lmtt10.pfb>
-Output written on forecasting_us_election_2020.pdf (11 pages, 396110 bytes).
+Output written on forecasting_us_election_2020.pdf (11 pages, 402377 bytes).
 PDF statistics:
- 302 PDF objects out of 1000 (max. 8388607)
- 251 compressed objects within 3 object streams
- 40 named destinations out of 1000 (max. 500000)
- 14412 words of extra memory for PDF output out of 17280 (max. 10000000)
+ 313 PDF objects out of 1000 (max. 8388607)
+ 262 compressed objects within 3 object streams
+ 43 named destinations out of 1000 (max. 500000)
+ 14420 words of extra memory for PDF output out of 17280 (max. 10000000)
 
