@@ -51,6 +51,12 @@ Data is from ACS (@citeIPUMS) and from Voter Study Group (@citeVSG).
 ```{r data1, echo=F, message=F, warning=F, fig.cap="Demographics of Sample and Population"}
 
 # set up proportions and plots for polling data (variables we focus on)
+# we do this by grouping by variable, getting the number of observations
+# and then finding the percentage and classifying if they are polling or 
+# post-strat data
+
+# we do this grouping for gender, race, education level, state, age and 
+# whether the respondent is hispanic or not
 gender <- polling %>% 
   group_by(sex) %>% 
   summarise(n = n()) %>% 
@@ -96,51 +102,59 @@ hispanic <- polling %>%
 
 # set up proportions for post-strat data
 
+# follow the same steps as above
+
 gender_post <- post_strat %>% 
   group_by(sex) %>% 
   summarise(n = n()) %>% 
-  mutate(pct = n/sum(n), type = "post_strat",
+  mutate(pct = n/sum(n), type = "post-strat",
          group = "gender") %>% 
   rename(level = sex)
 
 races_post <- post_strat %>% 
   group_by(races) %>% 
   summarise(n = n()) %>% 
-  mutate(pct = n/sum(n), type = "post_strat",
+  mutate(pct = n/sum(n), type = "post-strat",
          group = "races") %>% 
   rename(level = races)
 
 education_post <- post_strat %>% 
   group_by(education_level) %>% 
   summarise(n = n()) %>% 
-  mutate(pct = n/sum(n), type = "post_strat",
+  mutate(pct = n/sum(n), type = "post-strat",
          group = "education") %>% 
   rename(level = education_level)
 
 age_post <- post_strat %>% 
   group_by(age_groups) %>% 
   summarise(n = n()) %>% 
-  mutate(pct = n/sum(n), type = "post_strat",
+  mutate(pct = n/sum(n), type = "post-strat",
          group = "age") %>% 
   rename(level = age_groups)
 
 statesicp_post <- post_strat %>% 
   group_by(stateicp) %>% 
   summarise(n = n()) %>% 
-  mutate(pct = n/sum(n), type = "post_strat",
-         group = "state") %>% 
+  mutate(pct = n/sum(n), type = "post-strat",
+         group = "state") %>%
   rename(level = stateicp)
 
 hispanic_post <- post_strat %>% 
   group_by(hispanic) %>% 
   summarise(n = n()) %>% 
-  mutate(pct = n/sum(n), type = "post_strat",
+  mutate(pct = n/sum(n), type = "post-strat",
          group = "hispanic") %>% 
   rename(level = hispanic)
+
+# combine all of our grouped data into one data set
+# called variables
 
 variables <- rbind(hispanic, hispanic_post,
              age, age_post, gender, gender_post, 
              races, races_post)
+
+# finally plot our results, grouped by variable with each line representing
+# the proportions for the polling and post-strat data
 
 variables %>% ggplot(aes(as.factor(level), pct, group=as.factor(type), linetype = as.factor(type))) + 
   geom_line() + facet_grid(~group, scales = "free") + 
@@ -153,8 +167,15 @@ variables %>% ggplot(aes(as.factor(level), pct, group=as.factor(type), linetype 
 Figure \@ref(fig:data1) show us the voter demographics from the VSG data (@citeVSG) vs the ACS data (@citeIPUMS).
 
 ```{r data2, echo = F, message=F, warning=F, fig.cap="More Demographics of Sample and Population"}
+# combine educationa and state into one data set, need to separate these
+# because text overlaps and makes the data look cleaner
+
 variables2 <- rbind(education, education_post,
                     statesicp, statesicp_post)
+
+# plot our results, grouped by variable with each line representing
+# the proportions for the polling and post-strat data
+
 variables2 %>% ggplot(aes(as.factor(level), pct, group=as.factor(type), linetype = as.factor(type))) + 
   geom_line() + facet_wrap(~group, nrow = 2, scales = "free") + 
   theme(axis.text.x = element_text(angle=70, size = 6, hjust = 1)) +
@@ -165,16 +186,23 @@ variables2 %>% ggplot(aes(as.factor(level), pct, group=as.factor(type), linetype
 Figure \@ref(fig:data2) shows us more of the voter demographics from the VSG data (@citeVSG) vs the ACS data (@citeIPUMS).
 
 ```{r polling props, echo=F, message=F, warning=F}
+# group the proportion of respondents by whether they'll vote for
+# Biden or Trump
+
 polling_vote <- polling %>% 
   mutate(vote_biden_clean = ifelse(vote_biden == 1, "Joe Biden", "Donald Trump")) %>% 
   group_by(vote_biden_clean) %>% 
-  summarise(n = n()) %>% 
+  summarise(n = n()) %>%
   mutate(Proportion = round(n/sum(n)*100))
+
+# rename the columns to make it more presentable
 
 polling_vote <- polling_vote %>% 
   rename("Candidate" = vote_biden_clean,
          "Number of Respondents" = n,
          "Proportion (%)" = Proportion)
+
+# plot the table along with number of respondents and proportions
 
 kable(polling_vote, 
       caption = "Who decided voters plan to support (Polling Data)")
@@ -209,11 +237,21 @@ We are running our regression model using the `glm()` function in R (@citeR). Th
 Our model does have some weaknesses, since the output must be binary, we cannot account for other candidates or a person deciding not to vote. This issue isn't too large because our main goal is to determine which of the two main candidates will be chosen by the people of America. Another weakness we do encounter with our model and multi level regression with post-stratification is that 
 
 ```{r model, echo = F, message=F, warning=F, fig.cap="Results of Regression Model"}
+#run the regression model using glm.
+# sex, age_groups, race, stateicp, education_level and hispanic are used to 
+# predit whether a person will vote biden or not
+
 model <- glm(vote_biden ~ sex + age_groups + races +
                stateicp + education_level + hispanic, 
              data = polling, family = binomial())
 
+# save the coefficients along with the confidence intervals,
+# will be useful for our figures
+
 coefficients <- broom::tidy(model, conf.int = T)
+
+# create a table with the results of our coefficients along with p-values and
+# confidence intervals
 
 knitr::kable(coefficients,
              caption = "Coefficients from the Model") %>% 
@@ -224,6 +262,9 @@ knitr::kable(coefficients,
 Table \@ref(tab:model), shows the estimates for the coefficients that will fit into our logistic regression equation. These coefficients will fit into Equation \@ref(eq:logit), and were calculated using data from the Voter Study Group (@citeVSG). The table is made using `kable` from `knitr` (@citeKnitr) and is formatted using `kableExtra` (@citekableExtra)
 
 ```{r coefficients, echo=F, message=F, warning=F, fig.height=4, fig.cap="Coefficient Estimates"}
+# plot our coefficients with error bars to show the upper and lower
+# estimates for the coefficients
+
 coefficients %>% ggplot(aes(estimate, term)) +
   geom_point() +
   geom_errorbar(aes(xmin = conf.low, xmax = conf.high)) +
@@ -237,6 +278,8 @@ Figure \@ref(fig:coefficients) show us the coefficients that would fit into equa
 Using the outputs of the logisitic regression model, we can get an equation that follows the form of \@ref(eq:logit), but with the $\beta$ values filled out. This equation is difficult to write out because of the many variables, but in short, if the person's characteristic fits in with a certain variable, it is used in the equation. Then the equation is summed up and the probability is found using equation \@ref(eq:prob).
 
 ```{r cooks, echo=F, message=F, warning=F, fig.cap="Cook's Distance Plot for Model"}
+# create a plot for cook's distance for the model, numbering the 3
+# highest distances
 plot(model, which = 4, id.n = 3)
 ```
 
@@ -385,8 +428,13 @@ kable(estimates, caption = "Joe Biden Voting Result Estimates") %>%
 Table \@ref(tab:colleges) shows the lower, mean and upper predictions for the results of the election for Joe Biden. We see that on the lower end, Biden can expect to get 46.1% of the popular vote while only getting 191 electoral colleges. We also see that our middle estimate says Biden will get 51% of the popular vote while still losing the election by getting only 260 colleges. Lastly, on the upper estimate for Biden's results, he can get 55.9% of the popular vote while getting 423 colleges! This truly shows how close this election is, as we can see in Figure \@ref(fig:stateplot), many states are hovering around the 50% mark, which shows the colleges can go either way. The number of electoral colleges by state were found on the Britannica Encylopedia's website (@citecolleges).
 
 ```{r votingscales, echo=F, message=F, warning=F, fig.cap="Proportion of Biden votes by state"}
-test_plot <- poll_post_biden %>% arrange(desc(biden_predict))
-test_plot %>% ggplot(aes(y = reorder(stateicp, biden_predict), x = biden_predict)) +
+# arrange our proportions for each state in descending order
+
+stateprops_plot <- poll_post_biden %>% arrange(desc(biden_predict))
+
+# plot the results, with a line on 50% because of the electoral college
+
+stateprops_plot %>% ggplot(aes(y = reorder(stateicp, biden_predict), x = biden_predict)) +
   geom_point(stat = "identity") +
   geom_errorbar(aes(xmin = biden_predict_lower, xmax = biden_predict_upper)) +
   geom_vline(xintercept = 0.5, linetype = "dashed", color = "red") +
