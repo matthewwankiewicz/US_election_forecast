@@ -4,7 +4,6 @@ subtitle: "Data given with 4 percent margin of error"
 author: "Alen Mitrovski, Xiaoyan Yang, Matthew Wankiewicz"
 date: "November 2nd, 2020"
 abstract: "It seems like everyone has been waiting for the 2020 election, almost as soon as Donald Trump won in 2016. In our report, we use a logistic regression model along with multilevel regression  with post-stratification in order to predict who will win the election. According to our model, we predict that Joe Biden will win the popular vote over Donald Trump, 51% to 49%. These results are promising for the people of the United States, as they may be getting the change in President they need."
-keywords: "Forecasting, US 2020 Election, Trump, Biden, multilevel regression with post-stratification;"
 output:
   bookdown::pdf_document2:
     citation_package: natbib
@@ -39,6 +38,8 @@ post_strat <- readRDS("data/post_strat.rds")
 elec_college <- read_csv("data/electoral_colleges.csv")
 elec_college$State <- tolower(elec_college$State)
 ```
+
+**keywords**: Forecasting, US 2020 Election, Trump, Biden, multilevel regression with post-stratification;
 
 # Introduction
 
@@ -212,7 +213,17 @@ Table \@ref(tab:polling props) shows the proportion of decided voters who plan t
 
 # Model
 
-In order to predict whether or not a person plans to vote for Joe Biden or Donald Trump, we plan to nuild a logistic regression model using data from the Voter Study Group (@citeVSG) and then post-stratify it using Census Data (@citeIPUMS). Since logistic regression only works for binary response variables, we created a variable called `vote_biden` which returns a 1 is the respondent plans to vote for Joe Biden and a 0 if they plan to vote for Donald Trump. The logistic regression model takes the form of:
+For our analysis, we plan to use multilevel regression with post-stratification. Multilevel regression with post-stratification (MRP) is a type of analysis where we fit a model using a smaller data set, in this case our polling data and then use the results of the model to apply it to a larger population.
+
+The main steps for MRP are: Find the data set you want to use to create your model. For our scenario, we used the polling data from the Voter Study Group (@citeVSG). Next, you must create a model using your smaller sample. We used logistic regression and the data used was the polling data. Our equation takes the form of equation \@ref(eq:logit), as seen below. Once you have your model, you must apply it to your larger data set to give an idea of the population. For our report, we used the Census data from IPUMS (@citeIPUMS).
+
+MRP is extremely useful not only because of how simple it is but also because it allows us to estimate preferences of a population using individual responses from surveys. Also, as Kennedy and Gelman discuss in their paper "Know your population and know your model: Using model-based regression and post-stratification to generalize findings beyond the observed sample", MRP works best when you have a population and variables of interest and want to apply these variables using two data sets with different characteristics (@kennedy_gelman). Also, in relation to surveys, since you only use one survey to create your model, you don't encounter issues with having to have multiple surveys for each region/state and lets under-sampled populations to be represented through post-stratification. 
+
+MRP does encounter some weaknesses as well. Once again we can look to Kennedy and Gelman's paper where they say that MRP is dependent on how accurate the model is (@kennedy_gelman). If the generated model makes incorrect predictions or assumptions, your post-stratification will be incorrect and will hurt your results.
+
+To predict whether or not a person plans to vote for Joe Biden or Donald Trump, we plan to build a logistic regression model using data from the Voter Study Group (@citeVSG) and then post-stratify it using Census Data (@citeIPUMS). Since logistic regression only works for binary response variables, we created a variable called `vote_biden` which returns a 1 is the respondent plans to vote for Joe Biden and a 0 if they plan to vote for Donald Trump.
+
+The logistic regression model takes the form of:
 
 \begin{equation} 
   log(\frac{\hat{p}}{1 - \hat{p}}) = \beta_{0} + \beta_{1}x_{sex} + 
@@ -234,7 +245,7 @@ The output of the logistic regression model will give us a probability of whethe
 Equation \@ref(eq:prob) is just a manipulation of equation \@ref(eq:logit), where $e$ is the exponential equation and $sum$ is the sum of the right side of equation \@ref(eq:logit). We see that as the sum of the right side increases, the probability that a person will vote for Joe Biden increases as well. 
 We are running our regression model using the `glm()` function in R (@citeR). The decision to run this model over other models like linear regression was made by the fact that we were predicting a binary variable about a voter's decision. Since there are only two possible options our data will likely follow an S shape and a straight line equation will not be helpful to model this relationship. Another strength present for logistic regression is that when combined with post-stratification it allows us to take information from under-represented populations and it allows their views to be accounted for more greatly. For example, our polling data (@citeVSG), includes only 2 observations from Wyoming, but using multilevel regression with post-stratification, we can have that expanded to over 3000 people!
 
-Our model does have some weaknesses, since the output must be binary, we cannot account for other candidates or a person deciding not to vote. This issue isn't too large because our main goal is to determine which of the two main candidates will be chosen by the people of America. Another weakness we do encounter with our model and multi level regression with post-stratification is that 
+Our model does have some weaknesses, since the output must be binary, we cannot account for other candidates or a person deciding not to vote. This issue isn't too large because our main goal is to determine which of the two main candidates will be chosen by the people of America. Another weakness we do encounter with our model and multi level regression with post-stratification is that it has a strong dependence on the survey data. This is a weakness because if the survey has any gaps or there are any tweaks we need to make, it can change the course of results.
 
 ```{r model, echo = F, message=F, warning=F, fig.cap="Results of Regression Model"}
 #run the regression model using glm.
@@ -273,7 +284,7 @@ coefficients %>% ggplot(aes(estimate, term)) +
   theme(axis.text.y = element_text(size = 5))
 ```
 
-Figure \@ref(fig:coefficients) show us the coefficients that would fit into equation \@ref(eq:logit) using the polling data (@citeVSG). We also have error bars present, which show the upper and lower estimates for the coefficients. What we have to look out for in this scenario is that coefficients with negative values would mean that the person is more likely to vote for Donald Trump (with that characteristic) and positive values mean the person is more likely to vote for Joe Biden. Table \@ref(tab:model) shows a numerical view of Figure \@ref(fig:coefficients), along with p-values. 
+Figure \@ref(fig:coefficients) shows us the coefficients that would fit into equation \@ref(eq:logit) using the polling data (@citeVSG). We also have error bars present, which show the upper and lower estimates for the coefficients. What we have to look out for in this scenario is that coefficients with negative values would mean that the person is more likely to vote for Donald Trump (with that characteristic) and positive values mean the person is more likely to vote for Joe Biden. Table \@ref(tab:model) shows a numerical view of Figure \@ref(fig:coefficients), along with p-values. 
 
 Using the outputs of the logisitic regression model, we can get an equation that follows the form of \@ref(eq:logit), but with the $\beta$ values filled out. This equation is difficult to write out because of the many variables, but in short, if the person's characteristic fits in with a certain variable, it is used in the equation. Then the equation is summed up and the probability is found using equation \@ref(eq:prob).
 
@@ -283,7 +294,7 @@ Using the outputs of the logisitic regression model, we can get an equation that
 plot(model, which = 4, id.n = 3)
 ```
 
-Figure \@ref(fig:cooks) shows the cooks distance for observations in our polling data set. Cook's distance is useful for checking if a model is working correctly because it tells us how far a point is from the predicted value of it, telling us which points negatively impact our model. Figure \@ref(fig:cooks) takes all observations of our polling data (@citeVSG), and calculates the Cook's distance for it, showing which points can hurt the results of our model. We find that out of the 5200 obsevations, there aren't too many points that deviate from what we predict. This makes sense for our model because in the real world, there are some people who will support Donald Trump or Joe Biden, even if they don't "fit" the usual voter demographic for the candidate. Since the number of observations with large Cook's Distances are low, we can conclude that our model is fairly strong. 
+Figure \@ref(fig:cooks) shows the cooks distance for observations in our polling data set. Cook's distance is useful for checking if a model is working correctly because it tells us how far a point is from the predicted value of it, telling us which points negatively impact our model. In our scenario, the distance between values would be the true value using our `glm` model vs what the `predict.glm` function returned. Figure \@ref(fig:cooks) takes all observations of our polling data (@citeVSG), and calculates the Cook's distance for it, showing which points can hurt the results of our model. We find that out of the 5200 obsevations, there aren't too many points that deviate from what we predict. This makes sense for our model because in the real world, there are some people who will support Donald Trump or Joe Biden, even if they don't "fit" the usual voter demographic for the candidate. Since the number of observations with large Cook's Distances are low, we can conclude that our model is fairly strong. 
 
 # Results
 
@@ -365,8 +376,7 @@ poll_post_biden %>%
 ```
 
 
-Figure \@ref(fig:stateplot) shows us 
-
+Figure \@ref(fig:stateplot) shows us the proportion of respondents voting for Joe Biden broken down by state, along with the predicted proportions using MRP. We have also included the errors for each predicted value as well. We can see that the predicted proportions are fairly close to what the polling data showed. But, we also have to acknowledge the errors present, we can see that many states' errors cross over the 50% line which could be pivotal for each candidate because of the winner take all nature of the electoral college. We can see that some states like Florida and Georgia have small errors but there are some states who have very large ones like North Dakota and Wyoming.
 
 ```{r statemap, echo=F, message=F, warning=F, fig.cap="Proportion of Voters from Each State Voting Joe Biden"}
 # plot state map
@@ -385,7 +395,7 @@ voting_biden %>%
        title = "Map of the USA and which states plan to support Joe Biden or Donald Trump")
 ```
 
-Figure \@ref(fig:statemap) is an amazing view of all the states and which candidate they are leaning towards voting for. We see that states like Vermont, Conneticut and California are some of the more "blue" states, meaning they plan to vote for Joe Biden, while North Dakota, Arkansas and Idaho are the "red" states, planning to vote for Donald Trump. The states that are more white in colour can be the most important for the race when it comes to deciding an actual winner through the electoral college. We see that Florida, Louisiana and New Hampshire are some of the more undecided states, and a switch in these states, can influence the election greatly.
+Figure \@ref(fig:statemap) is an amazing view of all the states and which candidate they are leaning towards voting for using `statebins` (@citeStatebins). We see that states like Vermont, Conneticut and California are some of the more "blue" states, meaning they plan to vote for Joe Biden, while North Dakota, Arkansas and Idaho are the "red" states, planning to vote for Donald Trump. The states that are more white in colour can be the most important for the race when it comes to deciding an actual winner through the electoral college. We see that Florida, Louisiana and New Hampshire are some of the more undecided states, and a switch in these states, can influence the election greatly.
 
 ```{r colleges, echo=F, message=F, warning=F}
 # merge our electoral college data with predictions from model
@@ -425,7 +435,7 @@ kable(estimates, caption = "Joe Biden Voting Result Estimates") %>%
   kable_styling(latex_options = "scale_down")
 ```
 
-Table \@ref(tab:colleges) shows the lower, mean and upper predictions for the results of the election for Joe Biden. We see that on the lower end, Biden can expect to get 46.1% of the popular vote while only getting 191 electoral colleges. We also see that our middle estimate says Biden will get 51% of the popular vote while still losing the election by getting only 260 colleges. Lastly, on the upper estimate for Biden's results, he can get 55.9% of the popular vote while getting 423 colleges! This truly shows how close this election is, as we can see in Figure \@ref(fig:stateplot), many states are hovering around the 50% mark, which shows the colleges can go either way. The number of electoral colleges by state were found on the Britannica Encylopedia's website (@citecolleges).
+Table \@ref(tab:colleges) shows the lower, mean and upper predictions for the results of the election for Joe Biden. We see that on the lower end, Biden can expect to get 46.1% of the popular vote while only getting 191 electoral colleges. We also see that our middle estimate says Biden will get 51% of the popular vote while still losing the election by getting only 260 colleges. Lastly, on the upper estimate for Biden's results, he can get 55.9% of the popular vote while getting 423 colleges! This truly shows how close this election is, as we can see in Figure \@ref(fig:stateplot), many states are hovering around the 50% mark, which shows the colleges can go either way. The number of electoral colleges by state were found on the Britannica Encylopedia's website (@colleges).
 
 ```{r votingscales, echo=F, message=F, warning=F, fig.cap="Proportion of Biden votes by state"}
 # arrange our proportions for each state in descending order
