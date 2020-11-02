@@ -39,7 +39,7 @@ elec_college <- read_csv("data/electoral_colleges.csv")
 elec_college$State <- tolower(elec_college$State)
 ```
 
-**keywords**: Forecasting, US 2020 Election, Trump, Biden, multilevel regression with post-stratification;
+**Keywords**: Forecasting, US 2020 Election, Trump, Biden, multilevel regression with post-stratification;
 
 # Introduction
 
@@ -440,23 +440,28 @@ Table \@ref(tab:colleges) shows the lower, mean and upper predictions for the re
 ```{r votingscales, echo=F, message=F, warning=F, fig.cap="Proportion of Biden votes by state"}
 # arrange our proportions for each state in descending order
 
-stateprops_plot <- poll_post_biden %>% arrange(desc(biden_predict))
+stateprops_plot <- poll_post_biden %>% arrange(desc(biden_predict)) %>% 
+  mutate(support = ifelse(biden_predict >= 0.5, "Biden", "Trump"))
 
 # plot the results, with a line on 50% because of the electoral college
 
-stateprops_plot %>% ggplot(aes(y = reorder(stateicp, biden_predict), x = biden_predict)) +
+stateprops_plot %>% ggplot(aes(y = reorder(stateicp, biden_predict), x = biden_predict, 
+                               color = support)) +
   geom_point(stat = "identity") +
   geom_errorbar(aes(xmin = biden_predict_lower, xmax = biden_predict_upper)) +
   geom_vline(xintercept = 0.5, linetype = "dashed", color = "red") +
   labs(title = "Estimated Proportion of State Voting for Joe Biden",
        x = "Percentage", y= "State") +
   scale_x_continuous(labels = scales::percent) +
-  theme(axis.text.y = element_text(size = 5))
+  theme(axis.text.y = element_text(size = 5)) +
+  scale_color_manual(values = c("Blue", "Red"))
 ```
 
 Figure \@ref(fig:votingscales) is a different view of Figure \@ref(fig:stateplot), this time only focusing on the predictions for each state with the errors included. We see that many states have error bars overlapping the 50% line, showing that many states are a toss up, given the nature of the electoral college. 
 
 # Discussion
+
+Lastly, we can take a look at the state of Ohio. Ohio has been one of the best predictors for who will win the presidential election. Ballotpedia calls the state a "bellwether" because since 1900, Ohio has voted for the winning candidate 93.33% of the time (@ballotpedia). This is a remarkable number and as seen in \@ref(fig:statemap), Ohio appears to be more red than blue which may give us evidence that although Biden won the popular vote, Trump may scrape out a victory.
 
 # Code
 
