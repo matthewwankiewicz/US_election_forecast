@@ -290,7 +290,7 @@ polling_biden_map %>%
         axis.text = element_blank(),
         axis.ticks = element_blank()) +
   labs(fill = "Proportion Voting \nfor Biden",
-       title = "Map of the US States that plan to Joe Biden or Donald Trump")
+       title = "Map of the US States that plan to support Joe Biden or Donald Trump")
 ```
 
 Figure \@ref(fig:pollmap) shows the proportion of voters from each state who plan to vote for Joe Biden, this is using the polling data. We see that the east coast favours Biden much more than the mid-west does which is normal. We also see that Florida and Georgia are both on the fence on who they plan to vote for and could potentially be favouring Biden. This is significant because the last time that Georgia voted for the Democratic party was in 1992 (@georgia), showing a major shift to the blue.
@@ -554,7 +554,9 @@ Figure \@ref(fig:votingscales) is a different view of Figure \@ref(fig:stateplot
 
 # Discussion
 
-As seen in Table \@ref(tab:colleges), the mean estimate is that Joe Biden will win the popular vote with 51% of the vote. However, the American election operates according to the electoral college and as such, it is possible that a candidate wins the popular vote but loses the electoral college. This has happened on two occasions: in 2000 when Al Gore lost to George W. Bush and in 2016 when Donald Trump won over Hillary Clinton (@cbc). According to our results, Biden would win the popular vote but lose the electoral college vote with a mean estimate of 260 points (270 is the threshold for victory). The abolishment of the electoral college has been considered, however, professor Opal from McGill university notes that it would require a constitutional amendment to pass this unlikely change (@cbc).
+As seen in Table \@ref(tab:colleges), the mean estimate is that Joe Biden will win the popular vote with 51% of the vote with a margin of error of +/- 4%. However, the American election operates according to the electoral college and as such, it is possible that a candidate wins the popular vote but loses the electoral college. This has happened on two occasions: in 2000 when Al Gore lost to George W. Bush and in 2016 when Donald Trump won over Hillary Clinton (@cbc). According to our results, Biden would win the popular vote but lose the electoral college vote with a mean estimate of 260 points (270 is the threshold for victory). Although, the upper and lower estimates for Biden's college counts are 423 and 191, respectively. The abolishment of the electoral college has been considered, however, professor Opal from McGill university notes that it would require a constitutional amendment to pass this unlikely change (@cbc).
+
+We do observe a large distribution of colleges supporting Joe Biden. As referenced above, Table \@ref(tab:colleges) has a range of 191 to 423 colleges for Joe Biden. This large distribution shows that there are many states that are a toss-up and in some extreme scenarios, Joe Biden can win or lose all of the toss-up states and it can impact the results of the election drastically.
  
 Through Figure \@ref(fig:statemap), we can visualize numerous national trends of voting behaviour. First, it is observable that Joe Biden and the Democrats have a strong hold of the west coast states. However, this was not always the case. Up until 1988, the Republicans consistently had the support of California voters, who make up 55 electoral college points (@krishnakumar). However, California had a massive spike in Hispanic and Asian immigrants during the 1990s (@krishnakumar). This growing voter base was put off by the anti-immigration stance of the Republican party; Particularly in 1994, when the Republicans attempted to pass a law that would deny public services to illegal immigrants (@krishnakumar). As a result of information, it comes as no surprise that Biden has a strong lead in California in our data and collects the 55 electoral college points.
  

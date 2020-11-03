@@ -2,7 +2,7 @@
 
 This repo contains code and data for forecasting the US 2020 presidential election. It was created by Matthew Wankiewicz, Xiaoyan Yang and Alen Mitrovski. The purpose is to create a report that summarises the results of a statistical model that we built. Some data is unable to be shared publicly. We detail how to get that below. The sections of this repo are: inputs, outputs, scripts.
 
-Inputs contain data that are unchanged from their original. We use two datasets: 
+Inputs contain data that are unchanged from their original. We use two datasets, we cannot share these files but the steps we took to obtain them are documented below: 
 
 - Survey Data from Voter Study Group.
     - In order to obtain this data, visit https://www.voterstudygroup.org/publication/nationscape-data-set and scroll to the bottom of the page and enter your first and last name and your email. After completing this, you will receive an email, it may come quickly but it also may take a couple days (you've been warned!). After you get the email from the Voter Study Group, you will click the link that says "Download the .dta file". After completing this task, you will download a .zip file which contains many different weeks of survey data. The week that was chosen for this report was called "ns20200625". After completing these steps, you will have the data we used.
