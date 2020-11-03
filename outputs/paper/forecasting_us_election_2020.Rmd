@@ -104,7 +104,7 @@ According to their website, IPUMS says, "Non respondents are contacted via telep
 
 The post-stratification has about 2.5 million records. To maintain unity with the survey data, we selected age, gender, race, hispanic, education as the target variables. We cleaned and regrouped these variables to align with the survey data. Figures \@ref(fig:data1) and \@ref(fig:data2) show the corresponding variable comparisons between the survey and the post-stratification data. The solid line and dotted line represents the survey and the post-stratification data, respectively.
 
-```{r data1, echo=F, message=F, warning=F, fig.cap="Demographics of Sample and Population", fig.height=2}
+```{r data1, echo=F, message=F, warning=F, fig.cap="Demographics of Sample and Population"}
 
 # set up proportions and plots for polling data (variables we focus on)
 # we do this by grouping by variable, getting the number of observations
@@ -290,7 +290,7 @@ polling_biden_map %>%
         axis.text = element_blank(),
         axis.ticks = element_blank()) +
   labs(fill = "Proportion Voting \nfor Biden",
-       title = "Map of the USA and which states plan to support Joe Biden or Donald Trump")
+       title = "Map of the US States that plan to Joe Biden or Donald Trump")
 ```
 
 Figure \@ref(fig:pollmap) shows the proportion of voters from each state who plan to vote for Joe Biden, this is using the polling data. We see that the east coast favours Biden much more than the mid-west does which is normal. We also see that Florida and Georgia are both on the fence on who they plan to vote for and could potentially be favouring Biden. This is significant because the last time that Georgia voted for the Democratic party was in 1992 (@georgia), showing a major shift to the blue.

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  2 NOV 2020 21:32
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  2 NOV 2020 21:36
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -813,13 +813,13 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <5> on input line 155.
 [3] [4]
 <forecasting_us_election_2020_files/figure-latex/data1-1.pdf, id=140, 453.695pt
- x 134.5025pt>
+ x 315.1775pt>
 File: forecasting_us_election_2020_files/figure-latex/data1-1.pdf Graphic file 
 (type pdf)
 <use forecasting_us_election_2020_files/figure-latex/data1-1.pdf>
 Package pdftex.def Info: forecasting_us_election_2020_files/figure-latex/data1-
 1.pdf  used on input line 182.
-(pdftex.def)             Requested size: 453.6939pt x 134.50215pt.
+(pdftex.def)             Requested size: 453.6939pt x 315.17673pt.
 <forecasting_us_election_2020_files/figure-latex/data2-1.pdf, id=147, 453.695pt
  x 315.1775pt>
 File: forecasting_us_election_2020_files/figure-latex/data2-1.pdf Graphic file 
@@ -1005,7 +1005,7 @@ al/texlive/2018/texmf-dist/fonts/type1/public/lm/lmr9.pfb></usr/local/texlive/2
 dist/fonts/type1/public/lm/lmsy10.pfb></usr/local/texlive/2018/texmf-dist/fonts
 /type1/public/lm/lmtt10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/pub
 lic/lm/lmtt8.pfb>
-Output written on forecasting_us_election_2020.pdf (19 pages, 535831 bytes).
+Output written on forecasting_us_election_2020.pdf (19 pages, 535845 bytes).
 PDF statistics:
  626 PDF objects out of 1000 (max. 8388607)
  557 compressed objects within 6 object streams
