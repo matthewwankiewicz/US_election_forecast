@@ -3,7 +3,7 @@ title: "Joe Biden projected to win Popular Vote in 2020 US Election with 51% of 
 subtitle: "Results accurate within +/- 4 percentage points"
 author: "Alen Mitrovski, Xiaoyan Yang, Matthew Wankiewicz"
 date: "November 2nd, 2020"
-abstract: "It seems like everyone has been waiting for the 2020 election, almost as soon as Donald Trump won in 2016. In our report, we use a logistic regression model along with multilevel regression with post-stratification to predict who will win the election. According to our model, we predict that Joe Biden will win the popular vote over Donald Trump, 51% to 49% (results accurate within +/- 4%). We also find that although Joe Biden wins the popular vote, he is projected to lost the electoral college 278 to 260, meaning Donald Trump will be in office for another four years."
+abstract: "It seems like everyone has been waiting for the 2020 election, almost as soon as Donald Trump won in 2016. In our report, we use a logistic regression model along with multilevel regression with post-stratification to predict who will win the election. According to our model, we predict that Joe Biden will win the popular vote over Donald Trump, 51% to 49% (results accurate within +/- 4%). We also find that although Joe Biden wins the popular vote, he is projected to lose the electoral college 278 to 260, meaning Donald Trump will be in office for another four years."
 output:
   bookdown::pdf_document2:
     citation_package: natbib
